@@ -12,23 +12,6 @@
 [GET] /api/chat
 ```
 
-Query
-
-```
-?chat-id=[chatID]
-?type=["passcode" | "login" | "cookie"]
-```
-
-Header
-
-```
-Bearer [token]
-```
-
-body
-
-- なし
-
 ### 自分がホストのチャットを全て取得します
 
 ※ログイン必須
