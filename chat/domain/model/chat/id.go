@@ -38,13 +38,18 @@ func RestoreID(id string) (ID, error) {
 }
 
 // IDを取得します
-func (p ID) String() string {
-	return p.value
+func (i ID) String() string {
+	return i.value
+}
+
+// IDが存在しているか確認します
+func (i ID) IsEmpty() bool {
+	return i.value == ""
 }
 
 // IDを検証します
-func (p ID) validate() error {
-	_, err := uuid.Parse(p.value)
+func (i ID) validate() error {
+	_, err := uuid.Parse(i.value)
 	if err != nil {
 		return errors.NewError("検証に失敗しました", err)
 	}

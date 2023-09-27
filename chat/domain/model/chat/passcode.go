@@ -47,6 +47,11 @@ func (p Passcode) String() string {
 	return p.value
 }
 
+// パスコードが空か確認します
+func (p Passcode) IsEmpty() bool {
+	return p.value == ""
+}
+
 // パスコードを検証します
 func (p Passcode) validate() error {
 	matched, err := regexp.MatchString(`^\d{6}$`, p.value)
