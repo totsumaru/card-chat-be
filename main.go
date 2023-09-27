@@ -1,6 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
+
+func init() {
+	if _, err := os.Stat(".env"); err != nil {
+		
+	}
+}
 
 func main() {
 	fmt.Println("hello")
