@@ -1,7 +1,7 @@
-package chat
+package domain
 
 import (
-	"github.com/totsumaru/card-chat-be/chat/domain/model/chat/guest"
+	"github.com/totsumaru/card-chat-be/chat/domain/guest"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 )
 
@@ -12,6 +12,7 @@ type Chat struct {
 	hostID   ID
 	guest    guest.Guest
 	isRead   bool
+	isClosed bool // 使うかどうかは不明
 }
 
 // チャットを作成します
@@ -48,6 +49,7 @@ func RestoreChat(
 	hostID ID,
 	g guest.Guest,
 	isRead bool,
+	isClosed bool,
 ) (Chat, error) {
 	res := Chat{
 		id:       id,
@@ -55,6 +57,7 @@ func RestoreChat(
 		hostID:   hostID,
 		guest:    g,
 		isRead:   isRead,
+		isClosed: false, // 使用するまでは必ずfalse
 	}
 
 	if err := res.validate(); err != nil {
@@ -101,6 +104,36 @@ func (c *Chat) UpdateIsRead(isRead bool) error {
 	}
 
 	return nil
+}
+
+// IDを取得します
+func (c Chat) ID() ID {
+	return c.id
+}
+
+// パスコードを取得します
+func (c Chat) Passcode() Passcode {
+	return c.passcode
+}
+
+// ホストIDを取得します
+func (c Chat) HostID() ID {
+	return c.hostID
+}
+
+// ゲストを取得します
+func (c Chat) Guest() guest.Guest {
+	return c.guest
+}
+
+// 既読フラグを取得します
+func (c Chat) IsRead() bool {
+	return c.isRead
+}
+
+// Closeフラグを取得します
+func (c Chat) IsClosed() bool {
+	return c.isClosed
 }
 
 // チャットを検証します
