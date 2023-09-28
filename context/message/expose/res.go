@@ -8,20 +8,20 @@ import (
 
 // レスポンスです
 type Res struct {
-	ID         string
-	ChatID     string
-	FromUserID string
-	Content    string
-	Created    time.Time
+	ID      string
+	ChatID  string
+	FromID  string
+	Content string
+	Created time.Time
 }
 
 // メッセージをレスポンスに変換します
 func CreateRes(m domain.Message) Res {
 	return Res{
-		ID:         m.ID().String(),
-		ChatID:     m.ChatID().String(),
-		FromUserID: m.FromUserID().String(),
-		Content:    m.Content().String(),
-		Created:    m.Created(),
+		ID:      m.ID().String(),
+		ChatID:  m.ChatID().String(),
+		FromID:  m.FromID().String(),
+		Content: m.Content().String(),
+		Created: m.Created(),
 	}
 }

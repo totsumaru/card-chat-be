@@ -3,15 +3,15 @@ package domain
 import (
 	"time"
 
-	"github.com/totsumaru/card-chat-be/context/user/domain/company"
+	"github.com/totsumaru/card-chat-be/context/host/domain/company"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/url"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"github.com/totsumaru/card-chat-be/shared/now"
 )
 
-// ユーザーです
-type User struct {
+// ホストです
+type Host struct {
 	id           id.UUID // supabaseのIDと一致します
 	name         Name
 	avatarURL    url.URL
@@ -22,9 +22,9 @@ type User struct {
 	updated      time.Time
 }
 
-// ユーザーを作成します
-func NewUser(id id.UUID) (User, error) {
-	res := User{
+// ホストを作成します
+func NewHost(id id.UUID) (Host, error) {
+	res := Host{
 		id:      id,
 		created: now.NowJST(),
 		updated: now.NowJST(),
@@ -37,8 +37,8 @@ func NewUser(id id.UUID) (User, error) {
 	return res, nil
 }
 
-// ユーザーを復元します
-func RestoreUser(
+// ホストを復元します
+func RestoreHost(
 	id id.UUID,
 	name Name,
 	avatarURL url.URL,
@@ -47,8 +47,8 @@ func RestoreUser(
 	company company.Company,
 	created time.Time,
 	updated time.Time,
-) (User, error) {
-	res := User{
+) (Host, error) {
+	res := Host{
 		id:           id,
 		name:         name,
 		avatarURL:    avatarURL,
@@ -66,22 +66,22 @@ func RestoreUser(
 	return res, nil
 }
 
-// ユーザー情報を更新します
-func (u *User) UpdateUser(
+// ホスト情報を更新します
+func (h *Host) UpdateHost(
 	name Name,
 	avatarURL url.URL,
 	headline Headline,
 	introduction Introduction,
 	company company.Company,
 ) error {
-	u.name = name
-	u.avatarURL = avatarURL
-	u.headline = headline
-	u.introduction = introduction
-	u.company = company
-	u.updated = now.NowJST()
+	h.name = name
+	h.avatarURL = avatarURL
+	h.headline = headline
+	h.introduction = introduction
+	h.company = company
+	h.updated = now.NowJST()
 
-	if err := u.validate(); err != nil {
+	if err := h.validate(); err != nil {
 		return errors.NewError("検証に失敗しました")
 	}
 
@@ -89,52 +89,52 @@ func (u *User) UpdateUser(
 }
 
 // IDを取得します
-func (u User) ID() id.UUID {
-	return u.id
+func (h Host) ID() id.UUID {
+	return h.id
 }
 
 // 名前を取得します
-func (u User) Name() Name {
-	return u.name
+func (h Host) Name() Name {
+	return h.name
 }
 
 // アバターURLを取得します
-func (u User) AvatarURL() url.URL {
-	return u.avatarURL
+func (h Host) AvatarURL() url.URL {
+	return h.avatarURL
 }
 
 // ヘッドラインを取得します
-func (u User) Headline() Headline {
-	return u.headline
+func (h Host) Headline() Headline {
+	return h.headline
 }
 
 // 自己紹介を取得します
-func (u User) Introduction() Introduction {
-	return u.introduction
+func (h Host) Introduction() Introduction {
+	return h.introduction
 }
 
 // 会社情報を取得します
-func (u User) Company() company.Company {
-	return u.company
+func (h Host) Company() company.Company {
+	return h.company
 }
 
 // 作成日時を取得します
-func (u User) Created() time.Time {
-	return u.created
+func (h Host) Created() time.Time {
+	return h.created
 }
 
 // 更新日時を取得します
-func (u User) Updated() time.Time {
-	return u.updated
+func (h Host) Updated() time.Time {
+	return h.updated
 }
 
 // 検証します
-func (u User) validate() error {
-	if u.created.IsZero() {
+func (h Host) validate() error {
+	if h.created.IsZero() {
 		return errors.NewError("作成日時がゼロ値です")
 	}
 
-	if u.updated.IsZero() {
+	if h.updated.IsZero() {
 		return errors.NewError("更新日時がゼロ値です")
 	}
 

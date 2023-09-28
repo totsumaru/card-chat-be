@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// ユーザーの通知用Emailを更新します
+// ゲストの通知用Emailを更新します
 func UpdateEmail(tx *gorm.DB, chatID, mail string) (expose.Res, error) {
 	empty := expose.Res{}
 

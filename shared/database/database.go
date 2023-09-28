@@ -21,8 +21,8 @@ type ChatSchema struct {
 	LastMessage time.Time
 }
 
-// ユーザーのスキーマです
-type UserSchema struct {
+// ホストのスキーマです
+type HostSchema struct {
 	ID           string `gorm:"type:uuid;primary_key;"`
 	Name         string
 	AvatarURL    string
@@ -39,9 +39,9 @@ type UserSchema struct {
 
 // メッセージのスキーマです
 type MessageSchema struct {
-	ID         string `gorm:"type:uuid;primary_key;"`
-	ChatID     string `gorm:"index"`
-	FromUserID string
-	Content    string
-	Created    time.Time
+	ID      string `gorm:"type:uuid;primary_key;"`
+	ChatID  string `gorm:"index"`
+	FromID  string
+	Content string
+	Created time.Time
 }

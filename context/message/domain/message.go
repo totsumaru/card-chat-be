@@ -10,26 +10,26 @@ import (
 
 // メッセージです
 type Message struct {
-	id         id.UUID
-	chatID     id.UUID
-	fromUserID id.UUID
-	content    Content
-	created    time.Time
+	id      id.UUID
+	chatID  id.UUID
+	fromID  id.UUID // hostID or chatID が入ります
+	content Content
+	created time.Time
 }
 
 // メッセージを作成します
-func NewMessage(chatID, fromUserID id.UUID, content Content) (Message, error) {
+func NewMessage(chatID, fromID id.UUID, content Content) (Message, error) {
 	mID, err := id.NewUUID()
 	if err != nil {
 		return Message{}, errors.NewError("IDを作成できません", err)
 	}
 
 	res := Message{
-		id:         mID,
-		chatID:     chatID,
-		fromUserID: fromUserID,
-		content:    content,
-		created:    now.NowJST(),
+		id:      mID,
+		chatID:  chatID,
+		fromID:  fromID,
+		content: content,
+		created: now.NowJST(),
 	}
 
 	if err = res.validate(); err != nil {
@@ -41,16 +41,16 @@ func NewMessage(chatID, fromUserID id.UUID, content Content) (Message, error) {
 
 // メッセージを復元します
 func RestoreMessage(
-	id, chatID, fromUserID id.UUID,
+	id, chatID, fromID id.UUID,
 	content Content,
 	created time.Time,
 ) (Message, error) {
 	res := Message{
-		id:         id,
-		chatID:     chatID,
-		fromUserID: fromUserID,
-		content:    content,
-		created:    created,
+		id:      id,
+		chatID:  chatID,
+		fromID:  fromID,
+		content: content,
+		created: created,
 	}
 
 	if err := res.validate(); err != nil {
@@ -71,8 +71,8 @@ func (m Message) ChatID() id.UUID {
 }
 
 // 送信者を取得します
-func (m Message) FromUserID() id.UUID {
-	return m.fromUserID
+func (m Message) FromID() id.UUID {
+	return m.fromID
 }
 
 // 送信内容を取得します

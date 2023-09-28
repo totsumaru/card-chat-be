@@ -32,7 +32,7 @@ func main() {
 
 	// テーブルが存在していない場合のみテーブルを作成します
 	// 存在している場合はスキーマを同期します
-	if err = db.AutoMigrate(&database.UserSchema{}, &database.ChatSchema{}); err != nil {
+	if err = db.AutoMigrate(&database.HostSchema{}, &database.ChatSchema{}); err != nil {
 		panic(errors.NewError("テーブルのスキーマが一致しません", err))
 	}
 

@@ -92,11 +92,11 @@ func (g Gateway) FindByChatID(chatID id.UUID) ([]domain.Message, error) {
 // ドメインモデルをDBの構造体に変換します
 func castToDBMessage(m domain.Message) database.MessageSchema {
 	return database.MessageSchema{
-		ID:         m.ID().String(),
-		ChatID:     m.ChatID().String(),
-		FromUserID: m.FromUserID().String(),
-		Content:    m.Content().String(),
-		Created:    m.Created(),
+		ID:      m.ID().String(),
+		ChatID:  m.ChatID().String(),
+		FromID:  m.FromID().String(),
+		Content: m.Content().String(),
+		Created: m.Created(),
 	}
 }
 
@@ -114,9 +114,9 @@ func castToDomainModelMessage(dbMessage database.MessageSchema) (domain.Message,
 		return res, errors.NewError("チャットIDを復元できません", err)
 	}
 
-	fromUserID, err := id.RestoreUUID(dbMessage.FromUserID)
+	fromID, err := id.RestoreUUID(dbMessage.FromID)
 	if err != nil {
-		return res, errors.NewError("送信者のユーザーIDを復元できません", err)
+		return res, errors.NewError("送信者のIDを復元できません", err)
 	}
 
 	content, err := domain.NewContent(dbMessage.Content)
@@ -124,7 +124,7 @@ func castToDomainModelMessage(dbMessage database.MessageSchema) (domain.Message,
 		return res, errors.NewError("内容を作成できません", err)
 	}
 
-	m, err := domain.RestoreMessage(mID, chatID, fromUserID, content, dbMessage.Created)
+	m, err := domain.RestoreMessage(mID, chatID, fromID, content, dbMessage.Created)
 	if err != nil {
 		return res, errors.NewError("メッセージを作成できません", err)
 	}

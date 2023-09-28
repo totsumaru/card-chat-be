@@ -1,10 +1,10 @@
 package user
 
 import (
-	"github.com/totsumaru/card-chat-be/context/user/domain"
-	"github.com/totsumaru/card-chat-be/context/user/domain/company"
-	"github.com/totsumaru/card-chat-be/context/user/expose"
-	"github.com/totsumaru/card-chat-be/context/user/gateway"
+	"github.com/totsumaru/card-chat-be/context/host/domain"
+	"github.com/totsumaru/card-chat-be/context/host/domain/company"
+	"github.com/totsumaru/card-chat-be/context/host/expose"
+	"github.com/totsumaru/card-chat-be/context/host/gateway"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/email"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/tel"
@@ -13,8 +13,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// ユーザーの情報を更新するリクエストです
-type UpdateUserReq struct {
+// ホストの情報を更新するリクエストです
+type UpdateHostReq struct {
 	ID           string
 	Name         string
 	AvatarURL    string
@@ -27,24 +27,24 @@ type UpdateUserReq struct {
 	Website      string
 }
 
-// ユーザーの情報を更新します
-func UpdateUser(tx *gorm.DB, req UpdateUserReq) (expose.Res, error) {
+// ホストの情報を更新します
+func UpdateHost(tx *gorm.DB, req UpdateHostReq) (expose.Res, error) {
 	empty := expose.Res{}
 
-	uID, err := id.RestoreUUID(req.ID)
+	hostID, err := id.RestoreUUID(req.ID)
 	if err != nil {
 		return empty, errors.NewError("IDを復元できませんん", err)
 	}
 
-	// DBからユーザーを取得します
+	// DBからホストを取得します
 	gw, err := gateway.NewGateway(tx)
 	if err != nil {
 		return empty, errors.NewError("Gatewayを作成できません", err)
 	}
 
-	u, err := gw.FindByIDForUpdate(uID)
+	h, err := gw.FindByIDForUpdate(hostID)
 	if err != nil {
-		return empty, errors.NewError("IDでユーザーを取得できません", err)
+		return empty, errors.NewError("IDでホストを取得できません", err)
 	}
 
 	// 構造体を作成します
@@ -90,13 +90,13 @@ func UpdateUser(tx *gorm.DB, req UpdateUserReq) (expose.Res, error) {
 		return empty, errors.NewError("会社を作成できません", err)
 	}
 
-	if err = u.UpdateUser(name, avatar, headline, intro, comp); err != nil {
-		return empty, errors.NewError("ユーザーを作成できません", err)
+	if err = h.UpdateHost(name, avatar, headline, intro, comp); err != nil {
+		return empty, errors.NewError("ホストを更新できません", err)
 	}
 
-	if err = gw.Update(u); err != nil {
+	if err = gw.Update(h); err != nil {
 		return empty, errors.NewError("DBの更新に失敗しました", err)
 	}
 
-	return expose.CreateRes(u), nil
+	return expose.CreateRes(h), nil
 }

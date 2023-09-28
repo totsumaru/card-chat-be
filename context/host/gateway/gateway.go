@@ -1,8 +1,8 @@
 package gateway
 
 import (
-	"github.com/totsumaru/card-chat-be/context/user/domain"
-	"github.com/totsumaru/card-chat-be/context/user/domain/company"
+	"github.com/totsumaru/card-chat-be/context/host/domain"
+	"github.com/totsumaru/card-chat-be/context/host/domain/company"
 	"github.com/totsumaru/card-chat-be/shared/database"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/email"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
@@ -29,14 +29,14 @@ func NewGateway(tx *gorm.DB) (Gateway, error) {
 	return res, nil
 }
 
-// ユーザーを新規作成します
+// ホストを新規作成します
 //
 // 同じIDのレコードが存在する場合はエラーを返します。
-func (g Gateway) Create(u domain.User) error {
-	dbUser := castToDBUser(u)
+func (g Gateway) Create(u domain.Host) error {
+	dbHost := castToDBHost(u)
 
 	// 新しいレコードをデータベースに保存
-	result := g.tx.Create(&dbUser)
+	result := g.tx.Create(&dbHost)
 	if result.Error != nil {
 		return errors.NewError("レコードを保存できませんでした", result.Error)
 	}
@@ -49,14 +49,14 @@ func (g Gateway) Create(u domain.User) error {
 }
 
 // 更新します
-func (g Gateway) Update(u domain.User) error {
-	dbUser := castToDBUser(u)
+func (g Gateway) Update(u domain.Host) error {
+	dbHost := castToDBHost(u)
 
 	// IDに基づいてレコードを更新
-	result := g.tx.Model(&database.UserSchema{}).Where(
+	result := g.tx.Model(&database.HostSchema{}).Where(
 		"id = ?",
-		dbUser.ID,
-	).Updates(&dbUser)
+		dbHost.ID,
+	).Updates(&dbHost)
 	if result.Error != nil {
 		return errors.NewError("更新できません", result.Error)
 	}
@@ -69,12 +69,12 @@ func (g Gateway) Update(u domain.User) error {
 	return nil
 }
 
-// IDでユーザーを取得します
-func (g Gateway) FindByID(id id.UUID) (domain.User, error) {
-	res := domain.User{}
+// IDでホストを取得します
+func (g Gateway) FindByID(id id.UUID) (domain.Host, error) {
+	res := domain.Host{}
 
-	var dbUser database.UserSchema
-	if err := g.tx.First(&dbUser, "id = ?", id.String()).Error; err != nil {
+	var dbHost database.HostSchema
+	if err := g.tx.First(&dbHost, "id = ?", id.String()).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return res, errors.NewError("レコードが見つかりません")
 		}
@@ -82,7 +82,7 @@ func (g Gateway) FindByID(id id.UUID) (domain.User, error) {
 	}
 
 	// DB->ドメインモデルに変換します
-	res, err := castToDomainModel(dbUser)
+	res, err := castToDomainModel(dbHost)
 	if err != nil {
 		return res, errors.NewError("DBをドメインモデルに変換できません", err)
 	}
@@ -90,12 +90,12 @@ func (g Gateway) FindByID(id id.UUID) (domain.User, error) {
 	return res, nil
 }
 
-// FOR UPDATEでユーザーを取得します
-func (g Gateway) FindByIDForUpdate(id id.UUID) (domain.User, error) {
-	res := domain.User{}
+// FOR UPDATEでホストを取得します
+func (g Gateway) FindByIDForUpdate(id id.UUID) (domain.Host, error) {
+	res := domain.Host{}
 
-	var dbUser database.UserSchema
-	if err := g.tx.Set("gorm:query_option", "FOR UPDATE").First(&dbUser, "id = ?", id.String()).Error; err != nil {
+	var dbHost database.HostSchema
+	if err := g.tx.Set("gorm:query_option", "FOR UPDATE").First(&dbHost, "id = ?", id.String()).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return res, errors.NewError("レコードが見つかりません")
 		}
@@ -103,7 +103,7 @@ func (g Gateway) FindByIDForUpdate(id id.UUID) (domain.User, error) {
 	}
 
 	// DB->ドメインモデルに変換します
-	res, err := castToDomainModel(dbUser)
+	res, err := castToDomainModel(dbHost)
 	if err != nil {
 		return res, errors.NewError("DBをドメインモデルに変換できません", err)
 	}
@@ -112,8 +112,8 @@ func (g Gateway) FindByIDForUpdate(id id.UUID) (domain.User, error) {
 }
 
 // ドメインモデルをDBの構造体に変換します
-func castToDBUser(u domain.User) database.UserSchema {
-	return database.UserSchema{
+func castToDBHost(u domain.Host) database.HostSchema {
+	return database.HostSchema{
 		ID:           u.ID().String(),
 		Name:         u.Name().String(),
 		AvatarURL:    u.AvatarURL().String(),
@@ -128,52 +128,52 @@ func castToDBUser(u domain.User) database.UserSchema {
 }
 
 // DBの構造体からドメインモデルに変換します
-func castToDomainModel(dbUser database.UserSchema) (domain.User, error) {
-	res := domain.User{}
+func castToDomainModel(dbHost database.HostSchema) (domain.Host, error) {
+	res := domain.Host{}
 
-	uID, err := id.RestoreUUID(dbUser.ID)
+	hID, err := id.RestoreUUID(dbHost.ID)
 	if err != nil {
 		return res, errors.NewError("IDを復元できません", err)
 	}
 
-	name, err := domain.NewName(dbUser.Name)
+	name, err := domain.NewName(dbHost.Name)
 	if err != nil {
 		return res, errors.NewError("名前を作成できません", err)
 	}
 
-	avatar, err := url.NewURL(dbUser.AvatarURL)
+	avatar, err := url.NewURL(dbHost.AvatarURL)
 	if err != nil {
 		return res, errors.NewError("アバターURLを作成できません", err)
 	}
 
-	headline, err := domain.NewHeadline(dbUser.Headline)
+	headline, err := domain.NewHeadline(dbHost.Headline)
 	if err != nil {
 		return res, errors.NewError("ヘッドラインを作成できません", err)
 	}
 
-	intro, err := domain.NewIntroduction(dbUser.Introduction)
+	intro, err := domain.NewIntroduction(dbHost.Introduction)
 	if err != nil {
 		return res, errors.NewError("自己紹介を作成できません", err)
 	}
 
 	// 会社情報を作成
-	companyName, err := company.NewName(dbUser.CompanyName)
+	companyName, err := company.NewName(dbHost.CompanyName)
 	if err != nil {
 		return res, errors.NewError("会社名を作成できません", err)
 	}
-	position, err := company.NewPosition(dbUser.Position)
+	position, err := company.NewPosition(dbHost.Position)
 	if err != nil {
 		return res, errors.NewError("ポジションを作成できません", err)
 	}
-	t, err := tel.NewTel(dbUser.Tel)
+	t, err := tel.NewTel(dbHost.Tel)
 	if err != nil {
 		return res, errors.NewError("電話番号を作成できません", err)
 	}
-	mail, err := email.NewEmail(dbUser.Email)
+	mail, err := email.NewEmail(dbHost.Email)
 	if err != nil {
 		return res, errors.NewError("メールアドレスを作成できません", err)
 	}
-	website, err := url.NewURL(dbUser.Website)
+	website, err := url.NewURL(dbHost.Website)
 	if err != nil {
 		return res, errors.NewError("Websiteを作成できません", err)
 	}
@@ -182,11 +182,11 @@ func castToDomainModel(dbUser database.UserSchema) (domain.User, error) {
 		return res, errors.NewError("会社情報を作成できません", err)
 	}
 
-	res, err = domain.RestoreUser(
-		uID, name, avatar, headline, intro, comp, dbUser.Created, dbUser.Updated,
+	res, err = domain.RestoreHost(
+		hID, name, avatar, headline, intro, comp, dbHost.Created, dbHost.Updated,
 	)
 	if err != nil {
-		return res, errors.NewError("ユーザーを作成できません", err)
+		return res, errors.NewError("ホストを復元できません", err)
 	}
 
 	return res, nil

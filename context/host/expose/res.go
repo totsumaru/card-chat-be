@@ -3,7 +3,7 @@ package expose
 import (
 	"time"
 
-	"github.com/totsumaru/card-chat-be/context/user/domain"
+	"github.com/totsumaru/card-chat-be/context/host/domain"
 )
 
 // レスポンスです
@@ -25,7 +25,7 @@ type Res struct {
 }
 
 // チャットをレスポンスに変換します
-func CreateRes(u domain.User) Res {
+func CreateRes(u domain.Host) Res {
 	res := Res{}
 	res.ID = u.ID().String()
 	res.Name = u.Name().String()

@@ -12,7 +12,7 @@ import (
 // メッセージを作成します
 func CreateMessage(
 	tx *gorm.DB,
-	chatID, fromUserID, content string,
+	chatID, fromID, content string,
 ) (expose.Res, error) {
 	empty := expose.Res{}
 
@@ -21,9 +21,9 @@ func CreateMessage(
 		return empty, errors.NewError("IDを復元できません", err)
 	}
 
-	from, err := id.RestoreUUID(fromUserID)
+	from, err := id.RestoreUUID(fromID)
 	if err != nil {
-		return empty, errors.NewError("送信者のユーザーIDを復元できません", err)
+		return empty, errors.NewError("送信者のIDを復元できません", err)
 	}
 
 	c, err := domain.NewContent(content)
