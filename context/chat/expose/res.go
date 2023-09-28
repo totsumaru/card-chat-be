@@ -1,7 +1,9 @@
 package expose
 
 import (
-	"github.com/totsumaru/card-chat-be/chat/domain"
+	"time"
+
+	"github.com/totsumaru/card-chat-be/context/chat/domain"
 )
 
 // レスポンスです
@@ -9,16 +11,18 @@ type Res struct {
 	ID       string
 	Passcode string
 	HostID   string
-	Guest    GuestRes
-	IsRead   bool
-	IsClosed bool
-}
-
-// ゲストのレスポンスです
-type GuestRes struct {
-	DisplayName string
-	Memo        string
-	Email       string
+	Guest    struct {
+		DisplayName string
+		Memo        string
+		Email       string
+	}
+	IsRead    bool
+	IsClosed  bool
+	Timestamp struct {
+		Created     time.Time
+		Updated     time.Time
+		LastMessage time.Time
+	}
 }
 
 // チャットをレスポンスに変換します
@@ -32,6 +36,9 @@ func CreateRes(c domain.Chat) Res {
 	res.Guest.Email = c.Guest().Email().String()
 	res.IsRead = c.IsRead()
 	res.IsClosed = c.IsClosed()
+	res.Timestamp.Created = c.Timestamp().Created()
+	res.Timestamp.Updated = c.Timestamp().Updated()
+	res.Timestamp.LastMessage = c.Timestamp().LastMessage()
 
 	return res
 }

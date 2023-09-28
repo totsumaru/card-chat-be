@@ -1,18 +1,20 @@
 package domain
 
 import (
-	"github.com/totsumaru/card-chat-be/chat/domain/guest"
+	"github.com/totsumaru/card-chat-be/context/chat/domain/guest"
+	"github.com/totsumaru/card-chat-be/context/chat/domain/timestamp"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 )
 
 // チャットです
 type Chat struct {
-	id       ID
-	passcode Passcode
-	hostID   ID
-	guest    guest.Guest
-	isRead   bool
-	isClosed bool // 使うかどうかは不明
+	id        ID
+	passcode  Passcode
+	hostID    ID
+	guest     guest.Guest
+	isRead    bool
+	isClosed  bool // 使うかどうかは不明
+	timestamp timestamp.Timestamp
 }
 
 // チャットを作成します
@@ -32,8 +34,14 @@ func CreateChat() (Chat, error) {
 		return res, errors.NewError("パスコードを算出できません", err)
 	}
 
+	ts, err := timestamp.CreateInitTimestamp()
+	if err != nil {
+		return res, errors.NewError("タイムスタンプを作成できません", err)
+	}
+
 	res.id = id
 	res.passcode = passcode
+	res.timestamp = ts
 
 	if err = res.validate(); err != nil {
 		return res, errors.NewError("検証に失敗しました", err)
@@ -49,15 +57,16 @@ func RestoreChat(
 	hostID ID,
 	g guest.Guest,
 	isRead bool,
-	isClosed bool,
+	ts timestamp.Timestamp,
 ) (Chat, error) {
 	res := Chat{
-		id:       id,
-		passcode: pass,
-		hostID:   hostID,
-		guest:    g,
-		isRead:   isRead,
-		isClosed: false, // 使用するまでは必ずfalse
+		id:        id,
+		passcode:  pass,
+		hostID:    hostID,
+		guest:     g,
+		isRead:    isRead,
+		isClosed:  false, // 使用するまでは必ずfalse
+		timestamp: ts,
 	}
 
 	if err := res.validate(); err != nil {
@@ -70,14 +79,20 @@ func RestoreChat(
 // ホストIDを登録します
 //
 // チャット開始時の処理です。
-func (c *Chat) InitHostID(hostID ID) error {
-	if hostID.IsEmpty() {
+func (c *Chat) SetHostID(hostID ID) error {
+	if !hostID.IsEmpty() {
 		return errors.NewError("ホストIDがすでに設定されています")
 	}
 
-	c.hostID = hostID
+	newTimeStamp, err := c.timestamp.UpdateUpdatedTime()
+	if err != nil {
+		return errors.NewError("更新日時を更新できません", err)
+	}
 
-	if err := c.validate(); err != nil {
+	c.hostID = hostID
+	c.timestamp = newTimeStamp
+
+	if err = c.validate(); err != nil {
 		return errors.NewError("検証に失敗しました", err)
 	}
 
@@ -86,9 +101,15 @@ func (c *Chat) InitHostID(hostID ID) error {
 
 // ゲストの情報を変更します
 func (c *Chat) UpdateGuest(g guest.Guest) error {
-	c.guest = g
+	newTimestamp, err := c.timestamp.UpdateUpdatedTime()
+	if err != nil {
+		return errors.NewError("更新日時を更新できません", err)
+	}
 
-	if err := c.validate(); err != nil {
+	c.guest = g
+	c.timestamp = newTimestamp
+
+	if err = c.validate(); err != nil {
 		return errors.NewError("検証に失敗しました", err)
 	}
 
@@ -97,9 +118,15 @@ func (c *Chat) UpdateGuest(g guest.Guest) error {
 
 // 既読/未読処理をします
 func (c *Chat) UpdateIsRead(isRead bool) error {
-	c.isRead = isRead
+	newTimestamp, err := c.timestamp.UpdateLastMessageAndUpdatedTime()
+	if err != nil {
+		return errors.NewError("更新日時を更新できません", err)
+	}
 
-	if err := c.validate(); err != nil {
+	c.isRead = isRead
+	c.timestamp = newTimestamp
+
+	if err = c.validate(); err != nil {
 		return errors.NewError("検証に失敗しました", err)
 	}
 
@@ -134,6 +161,11 @@ func (c Chat) IsRead() bool {
 // Closeフラグを取得します
 func (c Chat) IsClosed() bool {
 	return c.isClosed
+}
+
+// タイムスタンプを取得します
+func (c Chat) Timestamp() timestamp.Timestamp {
+	return c.timestamp
 }
 
 // チャットを検証します

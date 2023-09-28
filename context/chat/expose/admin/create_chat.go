@@ -1,21 +1,18 @@
-package expose
+package admin
 
 import (
-	"github.com/totsumaru/card-chat-be/chat/domain"
-	"github.com/totsumaru/card-chat-be/chat/gateway"
+	"github.com/totsumaru/card-chat-be/context/chat/domain"
+	"github.com/totsumaru/card-chat-be/context/chat/expose"
+	"github.com/totsumaru/card-chat-be/context/chat/gateway"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
 
-// ===============================
-// 管理者のみが操作できる処理です
-// ===============================
-
 // チャットを作成します
 //
 // * idとパスワードは自動で生成されます
-func CreateChat(tx *gorm.DB) (Res, error) {
-	res := Res{}
+func CreateChat(tx *gorm.DB) (expose.Res, error) {
+	res := expose.Res{}
 
 	c, err := domain.CreateChat()
 	if err != nil {
@@ -31,5 +28,5 @@ func CreateChat(tx *gorm.DB) (Res, error) {
 		return res, errors.NewError("チャットのレコードを作成できません", err)
 	}
 
-	return CreateRes(c), nil
+	return expose.CreateRes(c), nil
 }
