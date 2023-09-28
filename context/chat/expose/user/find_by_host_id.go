@@ -1,9 +1,9 @@
 package user
 
 import (
-	"github.com/totsumaru/card-chat-be/context/chat/domain"
 	"github.com/totsumaru/card-chat-be/context/chat/expose"
 	"github.com/totsumaru/card-chat-be/context/chat/gateway"
+	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
@@ -12,7 +12,7 @@ import (
 //
 // 未読 > 最後にメッセージが送信された日時 の優先順位で取得します。
 func FindByHostID(tx *gorm.DB, hostID string) ([]expose.Res, error) {
-	hID, err := domain.RestoreID(hostID)
+	hID, err := id.RestoreUUID(hostID)
 	if err != nil {
 		return nil, errors.NewError("ホストIDを復元できません", err)
 	}

@@ -14,7 +14,7 @@ import (
 func CreateChat(tx *gorm.DB) (expose.Res, error) {
 	res := expose.Res{}
 
-	c, err := domain.CreateChat()
+	c, err := domain.NewChat()
 	if err != nil {
 		return res, errors.NewError("チャットを作成できません", err)
 	}

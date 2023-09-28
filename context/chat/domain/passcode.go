@@ -8,6 +8,7 @@ import (
 	"os"
 	"regexp"
 
+	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 )
 
@@ -17,7 +18,7 @@ type Passcode struct {
 }
 
 // パスコードを算出します
-func CalcPasscodeFromUUID(chatID ID) (Passcode, error) {
+func CalcPasscodeFromUUID(chatID id.UUID) (Passcode, error) {
 	res := Passcode{
 		value: generatePasscodeFromUUID(chatID.String()),
 	}

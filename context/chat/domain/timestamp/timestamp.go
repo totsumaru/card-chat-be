@@ -17,7 +17,7 @@ type Timestamp struct {
 // タイムスタンプを作成します
 //
 // チャットが作成された時のみ使用します。
-func CreateInitTimestamp() (Timestamp, error) {
+func NewTimestamp() (Timestamp, error) {
 	ts := Timestamp{
 		created:     now.NowJST(),
 		updated:     now.NowJST(),

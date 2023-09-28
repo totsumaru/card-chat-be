@@ -1,16 +1,19 @@
 package guest
 
-import "github.com/totsumaru/card-chat-be/shared/errors"
+import (
+	"github.com/totsumaru/card-chat-be/shared/domain_model/email"
+	"github.com/totsumaru/card-chat-be/shared/errors"
+)
 
 // ゲストの情報です
 type Guest struct {
 	displayName DisplayName
 	memo        Memo
-	email       Email
+	email       email.Email
 }
 
 // ゲストを作成します
-func NewGuest(d DisplayName, m Memo, e Email) (Guest, error) {
+func NewGuest(d DisplayName, m Memo, e email.Email) (Guest, error) {
 	res := Guest{
 		displayName: d,
 		memo:        m,
@@ -35,7 +38,7 @@ func (g Guest) Memo() Memo {
 }
 
 // メールアドレスを取得します
-func (g Guest) Email() Email {
+func (g Guest) Email() email.Email {
 	return g.email
 }
 

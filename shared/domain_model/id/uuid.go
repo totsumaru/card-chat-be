@@ -1,4 +1,4 @@
-package domain
+package id
 
 import (
 	"github.com/google/uuid"
@@ -6,13 +6,13 @@ import (
 )
 
 // IDです
-type ID struct {
+type UUID struct {
 	value string
 }
 
 // IDを作成します
-func NewID() (ID, error) {
-	res := ID{}
+func NewUUID() (UUID, error) {
+	res := UUID{}
 
 	newUUID, err := uuid.NewRandom()
 	if err != nil {
@@ -25,8 +25,8 @@ func NewID() (ID, error) {
 }
 
 // IDを復元します
-func RestoreID(id string) (ID, error) {
-	res := ID{
+func RestoreUUID(id string) (UUID, error) {
+	res := UUID{
 		value: id,
 	}
 
@@ -38,17 +38,17 @@ func RestoreID(id string) (ID, error) {
 }
 
 // IDを取得します
-func (i ID) String() string {
+func (i UUID) String() string {
 	return i.value
 }
 
 // IDが存在しているか確認します
-func (i ID) IsEmpty() bool {
+func (i UUID) IsEmpty() bool {
 	return i.value == ""
 }
 
 // IDを検証します
-func (i ID) validate() error {
+func (i UUID) validate() error {
 	_, err := uuid.Parse(i.value)
 	if err != nil {
 		return errors.NewError("検証に失敗しました", err)

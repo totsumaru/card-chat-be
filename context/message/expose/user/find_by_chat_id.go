@@ -1,9 +1,9 @@
 package user
 
 import (
-	"github.com/totsumaru/card-chat-be/context/message/domain"
 	"github.com/totsumaru/card-chat-be/context/message/expose"
 	"github.com/totsumaru/card-chat-be/context/message/gateway"
+	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
@@ -12,7 +12,7 @@ import (
 //
 // メッセージの作成日の降順(最近のチャットが先頭)で取得します
 func FindByChatID(tx *gorm.DB, chatID string) ([]expose.Res, error) {
-	cID, err := domain.RestoreID(chatID)
+	cID, err := id.RestoreUUID(chatID)
 	if err != nil {
 		return nil, errors.NewError("IDを復元できません", err)
 	}

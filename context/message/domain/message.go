@@ -3,28 +3,29 @@ package domain
 import (
 	"time"
 
+	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"github.com/totsumaru/card-chat-be/shared/now"
 )
 
 // メッセージです
 type Message struct {
-	id         ID
-	chatID     ID
-	fromUserID ID
+	id         id.UUID
+	chatID     id.UUID
+	fromUserID id.UUID
 	content    Content
 	created    time.Time
 }
 
 // メッセージを作成します
-func NewMessage(chatID, fromUserID ID, content Content) (Message, error) {
-	id, err := NewID()
+func NewMessage(chatID, fromUserID id.UUID, content Content) (Message, error) {
+	mID, err := id.NewUUID()
 	if err != nil {
 		return Message{}, errors.NewError("IDを作成できません", err)
 	}
 
 	res := Message{
-		id:         id,
+		id:         mID,
 		chatID:     chatID,
 		fromUserID: fromUserID,
 		content:    content,
@@ -39,7 +40,11 @@ func NewMessage(chatID, fromUserID ID, content Content) (Message, error) {
 }
 
 // メッセージを復元します
-func RestoreMessage(id, chatID, fromUserID ID, content Content, created time.Time) (Message, error) {
+func RestoreMessage(
+	id, chatID, fromUserID id.UUID,
+	content Content,
+	created time.Time,
+) (Message, error) {
 	res := Message{
 		id:         id,
 		chatID:     chatID,
@@ -56,17 +61,17 @@ func RestoreMessage(id, chatID, fromUserID ID, content Content, created time.Tim
 }
 
 // IDを取得します
-func (m Message) ID() ID {
+func (m Message) ID() id.UUID {
 	return m.id
 }
 
 // チャットIDを取得します
-func (m Message) ChatID() ID {
+func (m Message) ChatID() id.UUID {
 	return m.chatID
 }
 
 // 送信者を取得します
-func (m Message) FromUserID() ID {
+func (m Message) FromUserID() id.UUID {
 	return m.fromUserID
 }
 

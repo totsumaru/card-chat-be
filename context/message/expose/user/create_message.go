@@ -4,6 +4,7 @@ import (
 	"github.com/totsumaru/card-chat-be/context/message/domain"
 	"github.com/totsumaru/card-chat-be/context/message/expose"
 	"github.com/totsumaru/card-chat-be/context/message/gateway"
+	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
@@ -15,12 +16,12 @@ func CreateMessage(
 ) (expose.Res, error) {
 	empty := expose.Res{}
 
-	cID, err := domain.RestoreID(chatID)
+	cID, err := id.RestoreUUID(chatID)
 	if err != nil {
 		return empty, errors.NewError("IDを復元できません", err)
 	}
 
-	from, err := domain.RestoreID(fromUserID)
+	from, err := id.RestoreUUID(fromUserID)
 	if err != nil {
 		return empty, errors.NewError("送信者のユーザーIDを復元できません", err)
 	}

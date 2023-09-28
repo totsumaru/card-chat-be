@@ -1,9 +1,9 @@
 package user
 
 import (
-	"github.com/totsumaru/card-chat-be/context/message/domain"
 	"github.com/totsumaru/card-chat-be/context/message/expose"
 	"github.com/totsumaru/card-chat-be/context/message/gateway"
+	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
@@ -12,7 +12,7 @@ import (
 func FindByID(tx *gorm.DB, messageID string) (expose.Res, error) {
 	empty := expose.Res{}
 
-	id, err := domain.RestoreID(messageID)
+	mID, err := id.RestoreUUID(messageID)
 	if err != nil {
 		return empty, errors.NewError("IDを復元できませんん", err)
 	}
@@ -22,7 +22,7 @@ func FindByID(tx *gorm.DB, messageID string) (expose.Res, error) {
 		return empty, errors.NewError("Gatewayを作成できません", err)
 	}
 
-	res, err := gw.FindByID(id)
+	res, err := gw.FindByID(mID)
 	if err != nil {
 		return empty, errors.NewError("IDでチャットを取得できません", err)
 	}

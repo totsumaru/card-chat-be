@@ -5,6 +5,8 @@ import (
 	"github.com/totsumaru/card-chat-be/context/chat/domain/guest"
 	"github.com/totsumaru/card-chat-be/context/chat/domain/timestamp"
 	"github.com/totsumaru/card-chat-be/shared/database"
+	"github.com/totsumaru/card-chat-be/shared/domain_model/email"
+	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
@@ -67,7 +69,7 @@ func (g Gateway) Update(c domain.Chat) error {
 }
 
 // IDでチャットを取得します
-func (g Gateway) FindByID(id domain.ID) (domain.Chat, error) {
+func (g Gateway) FindByID(id id.UUID) (domain.Chat, error) {
 	res := domain.Chat{}
 
 	var dbChat database.ChatSchema
@@ -88,7 +90,7 @@ func (g Gateway) FindByID(id domain.ID) (domain.Chat, error) {
 }
 
 // 指定されたIDのチャットを取得し、そのチャットに対する排他ロックを取得します。
-func (g Gateway) FindByIDForUpdate(id domain.ID) (domain.Chat, error) {
+func (g Gateway) FindByIDForUpdate(id id.UUID) (domain.Chat, error) {
 	res := domain.Chat{}
 
 	var dbChat database.ChatSchema
@@ -113,7 +115,7 @@ func (g Gateway) FindByIDForUpdate(id domain.ID) (domain.Chat, error) {
 // 取得する順番
 //  1. IsRead=false(未読): メッセージが最近のものから降順
 //  2. IsRead=true(既読): メッセージが最近のものから降順
-func (g Gateway) FindByHostID(hostID domain.ID) ([]domain.Chat, error) {
+func (g Gateway) FindByHostID(hostID id.UUID) ([]domain.Chat, error) {
 	var dbChats []database.ChatSchema
 
 	// ORDER BY句を使ってソート条件を指定
@@ -162,7 +164,7 @@ func castToDBChat(c domain.Chat) database.ChatSchema {
 func castToDomainModelChat(dbChat database.ChatSchema) (domain.Chat, error) {
 	res := domain.Chat{}
 
-	id, err := domain.RestoreID(dbChat.ID)
+	cID, err := id.RestoreUUID(dbChat.ID)
 	if err != nil {
 		return res, errors.NewError("IDを復元できません", err)
 	}
@@ -172,7 +174,7 @@ func castToDomainModelChat(dbChat database.ChatSchema) (domain.Chat, error) {
 		return res, errors.NewError("パスコードを復元できません", err)
 	}
 
-	hostID, err := domain.RestoreID(dbChat.HostID)
+	hostID, err := id.RestoreUUID(dbChat.HostID)
 	if err != nil {
 		return res, errors.NewError("ホストIDを復元できません", err)
 	}
@@ -186,7 +188,7 @@ func castToDomainModelChat(dbChat database.ChatSchema) (domain.Chat, error) {
 	if err != nil {
 		return res, errors.NewError("メモを復元できません", err)
 	}
-	email, err := guest.NewEmail(dbChat.Email)
+	email, err := email.NewEmail(dbChat.Email)
 	if err != nil {
 		return res, errors.NewError("メールアドレスを復元できません", err)
 	}
@@ -201,7 +203,7 @@ func castToDomainModelChat(dbChat database.ChatSchema) (domain.Chat, error) {
 		return res, errors.NewError("タイムスタンプを復元できません", err)
 	}
 
-	res, err = domain.RestoreChat(id, passcode, hostID, g, dbChat.IsRead, ts)
+	res, err = domain.RestoreChat(cID, passcode, hostID, g, dbChat.IsRead, ts)
 	if err != nil {
 		return res, errors.NewError("チャットを復元できません", err)
 	}

@@ -3,6 +3,7 @@ package gateway
 import (
 	"github.com/totsumaru/card-chat-be/context/message/domain"
 	"github.com/totsumaru/card-chat-be/shared/database"
+	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
@@ -42,7 +43,7 @@ func (g Gateway) Create(m domain.Message) error {
 }
 
 // IDでメッセージを取得します
-func (g Gateway) FindByID(id domain.ID) (domain.Message, error) {
+func (g Gateway) FindByID(id id.UUID) (domain.Message, error) {
 	res := domain.Message{}
 
 	var dbMessage database.MessageSchema
@@ -65,7 +66,7 @@ func (g Gateway) FindByID(id domain.ID) (domain.Message, error) {
 // チャットIDでメッセージを取得します
 //
 // createの降順(最新のメッセージが先頭)で取得します。
-func (g Gateway) FindByChatID(chatID domain.ID) ([]domain.Message, error) {
+func (g Gateway) FindByChatID(chatID id.UUID) ([]domain.Message, error) {
 	var dbMessages []database.MessageSchema
 
 	// Orderメソッドを使ってcreatedの降順でソート
@@ -103,17 +104,17 @@ func castToDBMessage(m domain.Message) database.MessageSchema {
 func castToDomainModelMessage(dbMessage database.MessageSchema) (domain.Message, error) {
 	res := domain.Message{}
 
-	id, err := domain.RestoreID(dbMessage.ID)
+	mID, err := id.RestoreUUID(dbMessage.ID)
 	if err != nil {
 		return res, errors.NewError("IDを復元できません", err)
 	}
 
-	chatID, err := domain.RestoreID(dbMessage.ChatID)
+	chatID, err := id.RestoreUUID(dbMessage.ChatID)
 	if err != nil {
 		return res, errors.NewError("チャットIDを復元できません", err)
 	}
 
-	fromUserID, err := domain.RestoreID(dbMessage.FromUserID)
+	fromUserID, err := id.RestoreUUID(dbMessage.FromUserID)
 	if err != nil {
 		return res, errors.NewError("送信者のユーザーIDを復元できません", err)
 	}
@@ -123,7 +124,7 @@ func castToDomainModelMessage(dbMessage database.MessageSchema) (domain.Message,
 		return res, errors.NewError("内容を作成できません", err)
 	}
 
-	m, err := domain.RestoreMessage(id, chatID, fromUserID, content, dbMessage.Created)
+	m, err := domain.RestoreMessage(mID, chatID, fromUserID, content, dbMessage.Created)
 	if err != nil {
 		return res, errors.NewError("メッセージを作成できません", err)
 	}

@@ -1,19 +1,20 @@
 package user
 
 import (
-	"github.com/totsumaru/card-chat-be/context/chat/domain"
 	"github.com/totsumaru/card-chat-be/context/chat/domain/guest"
 	"github.com/totsumaru/card-chat-be/context/chat/expose"
 	"github.com/totsumaru/card-chat-be/context/chat/gateway"
+	"github.com/totsumaru/card-chat-be/shared/domain_model/email"
+	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
 
 // ユーザーの通知用Emailを更新します
-func UpdateEmail(tx *gorm.DB, chatID, email string) (expose.Res, error) {
+func UpdateEmail(tx *gorm.DB, chatID, mail string) (expose.Res, error) {
 	res := expose.Res{}
 
-	id, err := domain.RestoreID(chatID)
+	cID, err := id.RestoreUUID(chatID)
 	if err != nil {
 		return res, errors.NewError("IDを復元できませんん", err)
 	}
@@ -23,13 +24,13 @@ func UpdateEmail(tx *gorm.DB, chatID, email string) (expose.Res, error) {
 		return res, errors.NewError("Gatewayを作成できません", err)
 	}
 
-	c, err := gw.FindByIDForUpdate(id)
+	c, err := gw.FindByIDForUpdate(cID)
 	if err != nil {
 		return res, errors.NewError("IDでチャットを取得できません", err)
 	}
 
 	// Emailを作成
-	m, err := guest.NewEmail(email)
+	m, err := email.NewEmail(mail)
 	if err != nil {
 		return res, errors.NewError("Emailを作成できません", err)
 	}

@@ -3,14 +3,15 @@ package domain
 import (
 	"github.com/totsumaru/card-chat-be/context/chat/domain/guest"
 	"github.com/totsumaru/card-chat-be/context/chat/domain/timestamp"
+	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 )
 
 // チャットです
 type Chat struct {
-	id        ID
+	id        id.UUID
 	passcode  Passcode
-	hostID    ID
+	hostID    id.UUID
 	guest     guest.Guest
 	isRead    bool
 	isClosed  bool // 使うかどうかは不明
@@ -21,10 +22,10 @@ type Chat struct {
 //
 // チャットカード発行時の処理です。
 // (運営が実行する操作です)
-func CreateChat() (Chat, error) {
+func NewChat() (Chat, error) {
 	res := Chat{}
 
-	id, err := NewID()
+	id, err := id.NewUUID()
 	if err != nil {
 		return res, errors.NewError("IDを作成できません", err)
 	}
@@ -34,7 +35,7 @@ func CreateChat() (Chat, error) {
 		return res, errors.NewError("パスコードを算出できません", err)
 	}
 
-	ts, err := timestamp.CreateInitTimestamp()
+	ts, err := timestamp.NewTimestamp()
 	if err != nil {
 		return res, errors.NewError("タイムスタンプを作成できません", err)
 	}
@@ -52,9 +53,9 @@ func CreateChat() (Chat, error) {
 
 // チャットを復元します
 func RestoreChat(
-	id ID,
+	id id.UUID,
 	pass Passcode,
-	hostID ID,
+	hostID id.UUID,
 	g guest.Guest,
 	isRead bool,
 	ts timestamp.Timestamp,
@@ -79,7 +80,7 @@ func RestoreChat(
 // ホストIDを登録します
 //
 // チャット開始時の処理です。
-func (c *Chat) SetHostID(hostID ID) error {
+func (c *Chat) SetHostID(hostID id.UUID) error {
 	if !hostID.IsEmpty() {
 		return errors.NewError("ホストIDがすでに設定されています")
 	}
@@ -134,7 +135,7 @@ func (c *Chat) UpdateIsRead(isRead bool) error {
 }
 
 // IDを取得します
-func (c Chat) ID() ID {
+func (c Chat) ID() id.UUID {
 	return c.id
 }
 
@@ -144,7 +145,7 @@ func (c Chat) Passcode() Passcode {
 }
 
 // ホストIDを取得します
-func (c Chat) HostID() ID {
+func (c Chat) HostID() id.UUID {
 	return c.hostID
 }
 
