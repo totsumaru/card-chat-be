@@ -25,3 +25,12 @@ type ChatSchema struct {
 type UserSchema struct {
 	ID int `gorm:"primaryKey"`
 }
+
+// メッセージのスキーマです
+type MessageSchema struct {
+	ID         string `gorm:"primaryKey"`
+	ChatID     string `gorm:"index"`
+	FromUserID string
+	Content    string
+	Created    time.Time
+}

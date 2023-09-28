@@ -4,7 +4,7 @@ import (
 	"github.com/totsumaru/card-chat-be/context/chat/domain"
 	"github.com/totsumaru/card-chat-be/context/chat/domain/guest"
 	"github.com/totsumaru/card-chat-be/context/chat/domain/timestamp"
-	"github.com/totsumaru/card-chat-be/database"
+	"github.com/totsumaru/card-chat-be/shared/database"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )

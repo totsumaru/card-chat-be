@@ -6,7 +6,7 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/totsumaru/card-chat-be/database"
+	"github.com/totsumaru/card-chat-be/shared/database"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
