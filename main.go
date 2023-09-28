@@ -2,10 +2,14 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/totsumaru/card-chat-be/api"
 	"github.com/totsumaru/card-chat-be/shared/database"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/driver/sqlite"
@@ -32,8 +36,51 @@ func main() {
 
 	// テーブルが存在していない場合のみテーブルを作成します
 	// 存在している場合はスキーマを同期します
-	if err = db.AutoMigrate(&database.HostSchema{}, &database.ChatSchema{}); err != nil {
+	if err = db.AutoMigrate(
+		&database.HostSchema{},
+		&database.ChatSchema{},
+		&database.MessageSchema{},
+	); err != nil {
 		panic(errors.NewError("テーブルのスキーマが一致しません", err))
+	}
+
+	// gin
+	engine := gin.Default()
+
+	// CORSの設定
+	// ここからCorsの設定
+	engine.Use(cors.New(cors.Config{
+		// アクセスを許可したいアクセス元
+		AllowOrigins: []string{
+			"*",
+		},
+		// アクセスを許可したいHTTPメソッド(以下の例だとPUTやDELETEはアクセスできません)
+		AllowMethods: []string{
+			"GET",
+			"PATCH",
+			"POST",
+		},
+		// 許可したいHTTPリクエストヘッダ
+		AllowHeaders: []string{
+			"Access-Control-Allow-Credentials",
+			"Access-Control-Allow-Headers",
+			"Content-Type",
+			"Content-Length",
+			"Accept-Encoding",
+			"Authorization",
+			"Token",
+		},
+		// cookieなどの情報を必要とするかどうか
+		//AllowCredentials: true,
+		// preflightリクエストの結果をキャッシュする時間
+		//MaxAge: 24 * time.Hour,
+	}))
+
+	// ルートを設定する
+	api.RegisterRouter(engine, db)
+
+	if err := engine.Run(":8080"); err != nil {
+		log.Fatal("起動に失敗しました")
 	}
 
 	fmt.Println("success!!")

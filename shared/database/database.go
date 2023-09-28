@@ -6,21 +6,6 @@ const (
 	DBName = "card-chat.db"
 )
 
-// チャットのDBです
-type ChatSchema struct {
-	ID          string `gorm:"type:uuid;primary_key;"`
-	Passcode    string `gorm:"index"`
-	HostID      string `gorm:"index"`
-	DisplayName string
-	Memo        string
-	Email       string
-	IsRead      bool
-	IsClosed    bool
-	Created     time.Time
-	Updated     time.Time
-	LastMessage time.Time
-}
-
 // ホストのスキーマです
 type HostSchema struct {
 	ID           string `gorm:"type:uuid;primary_key;"`
@@ -35,6 +20,21 @@ type HostSchema struct {
 	Website      string
 	Created      time.Time
 	Updated      time.Time
+}
+
+// チャットのDBです
+type ChatSchema struct {
+	ID          string `gorm:"type:uuid;primary_key;"`
+	Passcode    string `gorm:"index"`
+	HostID      string `gorm:"index"`
+	DisplayName string
+	Memo        string
+	Email       string
+	IsRead      bool
+	IsClosed    bool
+	Created     time.Time
+	Updated     time.Time
+	LastMessage time.Time
 }
 
 // メッセージのスキーマです
