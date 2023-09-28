@@ -81,6 +81,10 @@ func (u *User) UpdateUser(
 	u.company = company
 	u.updated = now.NowJST()
 
+	if err := u.validate(); err != nil {
+		return errors.NewError("検証に失敗しました")
+	}
+
 	return nil
 }
 

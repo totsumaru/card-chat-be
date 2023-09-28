@@ -69,6 +69,48 @@ func (g Gateway) Update(u domain.User) error {
 	return nil
 }
 
+// IDでユーザーを取得します
+func (g Gateway) FindByID(id id.UUID) (domain.User, error) {
+	res := domain.User{}
+
+	var dbUser database.UserSchema
+	if err := g.tx.First(&dbUser, "id = ?", id.String()).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return res, errors.NewError("レコードが見つかりません")
+		}
+		return res, errors.NewError("IDでチャットを取得できません", err)
+	}
+
+	// DB->ドメインモデルに変換します
+	res, err := castToDomainModel(dbUser)
+	if err != nil {
+		return res, errors.NewError("DBをドメインモデルに変換できません", err)
+	}
+
+	return res, nil
+}
+
+// FOR UPDATEでユーザーを取得します
+func (g Gateway) FindByIDForUpdate(id id.UUID) (domain.User, error) {
+	res := domain.User{}
+
+	var dbUser database.UserSchema
+	if err := g.tx.Set("gorm:query_option", "FOR UPDATE").First(&dbUser, "id = ?", id.String()).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return res, errors.NewError("レコードが見つかりません")
+		}
+		return res, errors.NewError("IDでチャットを取得できません", err)
+	}
+
+	// DB->ドメインモデルに変換します
+	res, err := castToDomainModel(dbUser)
+	if err != nil {
+		return res, errors.NewError("DBをドメインモデルに変換できません", err)
+	}
+
+	return res, nil
+}
+
 // ドメインモデルをDBの構造体に変換します
 func castToDBUser(u domain.User) database.UserSchema {
 	return database.UserSchema{
