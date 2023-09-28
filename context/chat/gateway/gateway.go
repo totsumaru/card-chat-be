@@ -28,7 +28,7 @@ func NewGateway(tx *gorm.DB) (Gateway, error) {
 	return res, nil
 }
 
-// レコードを新規作成します
+// チャットを新規作成します
 //
 // 同じIDのレコードが存在する場合はエラーを返します。
 func (g Gateway) Create(c domain.Chat) error {
@@ -143,7 +143,7 @@ func (g Gateway) FindByHostID(hostID id.UUID) ([]domain.Chat, error) {
 	return domainChats, nil
 }
 
-// チャット構造体をDBのチャット構造体に変換します
+// ドメインモデルをDBの構造体に変換します
 func castToDBChat(c domain.Chat) database.ChatSchema {
 	return database.ChatSchema{
 		ID:          c.ID().String(),
@@ -188,12 +188,12 @@ func castToDomainModelChat(dbChat database.ChatSchema) (domain.Chat, error) {
 	if err != nil {
 		return res, errors.NewError("メモを復元できません", err)
 	}
-	email, err := email.NewEmail(dbChat.Email)
+	mail, err := email.NewEmail(dbChat.Email)
 	if err != nil {
 		return res, errors.NewError("メールアドレスを復元できません", err)
 	}
 
-	g, err := guest.NewGuest(displayName, memo, email)
+	g, err := guest.NewGuest(displayName, memo, mail)
 	if err != nil {
 		return res, errors.NewError("ゲストを復元できません", err)
 	}

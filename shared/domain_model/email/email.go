@@ -34,6 +34,11 @@ func (e Email) String() string {
 
 // メールアドレスを検証します
 func (e Email) validate() error {
+	// 空の値を許容します
+	if e.value == "" {
+		return nil
+	}
+
 	if len(e.value) > EmailMaxLen {
 		return errors.NewError("文字数を超えています")
 	}
