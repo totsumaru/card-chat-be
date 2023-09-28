@@ -20,7 +20,7 @@ type Passcode struct {
 // パスコードを算出します
 func CalcPasscodeFromUUID(chatID id.UUID) (Passcode, error) {
 	res := Passcode{
-		value: generatePasscodeFromUUID(chatID.String()),
+		value: GeneratePasscodeFromUUID(chatID.String()),
 	}
 
 	if err := res.validate(); err != nil {
@@ -69,7 +69,7 @@ func (p Passcode) validate() error {
 // パスコードを生成します
 //
 // uuidと秘密鍵から、必ず一意となるパスコードを生成します。
-func generatePasscodeFromUUID(uuid string) string {
+func GeneratePasscodeFromUUID(uuid string) string {
 	secretKey := os.Getenv("PASSCODE_SECRET_KEY")
 
 	// HMACを使用してUUIDをハッシュ化
