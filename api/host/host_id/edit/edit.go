@@ -3,6 +3,7 @@ package edit
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
+	"github.com/totsumaru/card-chat-be/api/internal/session"
 	"github.com/totsumaru/card-chat-be/context/host/expose/user"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
@@ -12,8 +13,11 @@ import (
 func Edit(e *gin.Engine, db *gorm.DB) {
 	e.POST("/api/host/:hostID/edit", func(c *gin.Context) {
 		hostID := c.Param("hostID")
-		if hostID == "" {
-			api_err.Send(c, 404, errors.NewError("ホストIDが空です"))
+
+		// 認証
+		ok, res := session.Verify(c)
+		if !ok || hostID != res.HostID {
+			api_err.Send(c, 401, errors.NewError("認証できません"))
 			return
 		}
 
@@ -22,8 +26,6 @@ func Edit(e *gin.Engine, db *gorm.DB) {
 			api_err.Send(c, 500, errors.NewError("画像ファイルを取得できません", err))
 			return
 		}
-
-		// TODO: 認証
 
 		tx := db.Begin()
 		if tx.Error != nil {
