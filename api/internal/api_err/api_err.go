@@ -10,6 +10,8 @@ import (
 func Send(c *gin.Context, status int, err error) {
 	var msg string
 	switch status {
+	case 400:
+		msg = "リクエストが不正です"
 	case 401:
 		msg = "認証できません"
 	case 500:

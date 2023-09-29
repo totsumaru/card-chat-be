@@ -12,14 +12,14 @@ import (
 func Edit(e *gin.Engine, db *gorm.DB) {
 	e.POST("/api/host/:hostID/edit", func(c *gin.Context) {
 		hostID := c.Param("hostID")
+		if hostID == "" {
+			api_err.Send(c, 404, errors.NewError("ホストIDが空です"))
+			return
+		}
 
-		avatarImage, err := c.FormFile("file")
-
-		// TODO: 一時的
-		// ファイルをサーバーに保存
-		err = c.SaveUploadedFile(avatarImage, "./uploads/"+avatarImage.Filename)
+		avatarImageFile, err := c.FormFile("avatar")
 		if err != nil {
-			c.JSON(500, gin.H{"error": err.Error()})
+			api_err.Send(c, 500, errors.NewError("画像ファイルを取得できません", err))
 			return
 		}
 
@@ -36,7 +36,7 @@ func Edit(e *gin.Engine, db *gorm.DB) {
 			req := user.UpdateHostReq{
 				ID:           hostID,
 				Name:         c.PostForm("name"),
-				AvatarFile:   avatarImage,
+				AvatarFile:   avatarImageFile,
 				Headline:     c.PostForm("headline"),
 				Introduction: c.PostForm("introduction"),
 				CompanyName:  c.PostForm("company_name"),
