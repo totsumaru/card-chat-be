@@ -2,8 +2,10 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	chat_create "github.com/totsumaru/card-chat-be/api/chat/create"
+	host_create "github.com/totsumaru/card-chat-be/api/host/create"
 	"github.com/totsumaru/card-chat-be/api/host/host_id"
-	"github.com/totsumaru/card-chat-be/api/host/host_id/edit"
+	host_edit "github.com/totsumaru/card-chat-be/api/host/host_id/edit"
 	"gorm.io/gorm"
 )
 
@@ -11,10 +13,14 @@ import (
 func RegisterRouter(e *gin.Engine, db *gorm.DB) {
 	Route(e)
 	// `/chat`
+	chat_create.CreateChat(e, db)
+
 	// `/chats`
+
 	// `/host`
-	host_id.Host(e, db)
-	edit.Edit(e, db)
+	host_id.GetHost(e, db)
+	host_edit.EditHostProfile(e, db)
+	host_create.CreateHost(e, db)
 }
 
 // ルートです

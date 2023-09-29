@@ -2,8 +2,8 @@ package host_id
 
 import (
 	"github.com/gin-gonic/gin"
-	shared_api "github.com/totsumaru/card-chat-be/api/internal"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
+	shared_api "github.com/totsumaru/card-chat-be/api/internal/res"
 	"github.com/totsumaru/card-chat-be/context/host/expose/user"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
@@ -11,11 +11,11 @@ import (
 
 // レスポンスです
 type Res struct {
-	shared_api.HostRes
+	Host shared_api.HostRes `json:"host"`
 }
 
 // ホストの情報を取得します
-func Host(e *gin.Engine, db *gorm.DB) {
+func GetHost(e *gin.Engine, db *gorm.DB) {
 	e.GET("/api/host/:hostID", func(c *gin.Context) {
 		hostID := c.Param("hostID")
 
@@ -34,16 +34,16 @@ func Host(e *gin.Engine, db *gorm.DB) {
 				return errors.NewError("ホストが取得できません", err)
 			}
 
-			res.ID = apiRes.ID
-			res.Name = apiRes.Name
-			res.AvatarURL = apiRes.AvatarURL
-			res.Headline = apiRes.Headline
-			res.Introduction = apiRes.Introduction
-			res.Company.Name = apiRes.Company.Name
-			res.Company.Position = apiRes.Company.Position
-			res.Company.Tel = apiRes.Company.Tel
-			res.Company.Email = apiRes.Company.Email
-			res.Company.Website = apiRes.Company.Website
+			res.Host.ID = apiRes.ID
+			res.Host.Name = apiRes.Name
+			res.Host.AvatarURL = apiRes.AvatarURL
+			res.Host.Headline = apiRes.Headline
+			res.Host.Introduction = apiRes.Introduction
+			res.Host.Company.Name = apiRes.Company.Name
+			res.Host.Company.Position = apiRes.Company.Position
+			res.Host.Company.Tel = apiRes.Company.Tel
+			res.Host.Company.Email = apiRes.Company.Email
+			res.Host.Company.Website = apiRes.Company.Website
 
 			return nil
 		}()

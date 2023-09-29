@@ -35,7 +35,6 @@
     "website": "https://techcorp.example.com"
   }
 }
-
 ```
 
 ### Error

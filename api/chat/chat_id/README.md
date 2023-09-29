@@ -4,6 +4,8 @@
 
 クリティカルな場合(悪意のあるリクエストなど)のみエラーを返します。
 
+認証できたら、Websocketでリアルタイム通信を実装します。
+
 ```
 [GET] /api/chat/[chat-id]
 ```
@@ -24,14 +26,14 @@ Authorization: Bearer [token]
 
 - code: `200`
 - レスポンスのステータス
+    - チャットが開始していない:
+        - ログイン済み: `first-is-login`
+        - ログインしていない: `first-not-login`
     - チャットが開始している:
         - ホスト: `host`
         - ホストでは無い:
             - cookieのパスコードが一致: `guest`
             - cookieのパスコードが一致しない: `visitor`
-    - チャットが開始していない:
-        - ログイン済み: `first-is-login`
-        - ログインしていない: `first-not-login`
 - ゲストの場合のみパスコードを返します
     - ※通知用Emailの設定のために返します
 

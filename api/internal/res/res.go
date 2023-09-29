@@ -1,4 +1,4 @@
-package internal
+package res
 
 // ホストのレスポンスです
 type HostRes struct {

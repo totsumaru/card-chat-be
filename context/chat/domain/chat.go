@@ -25,12 +25,12 @@ type Chat struct {
 func NewChat() (Chat, error) {
 	res := Chat{}
 
-	id, err := id.NewUUID()
+	cID, err := id.NewUUID()
 	if err != nil {
 		return res, errors.NewError("IDを作成できません", err)
 	}
 
-	passcode, err := CalcPasscodeFromUUID(id)
+	passcode, err := CalcPasscodeFromUUID(cID)
 	if err != nil {
 		return res, errors.NewError("パスコードを算出できません", err)
 	}
@@ -40,7 +40,7 @@ func NewChat() (Chat, error) {
 		return res, errors.NewError("タイムスタンプを作成できません", err)
 	}
 
-	res.id = id
+	res.id = cID
 	res.passcode = passcode
 	res.timestamp = ts
 

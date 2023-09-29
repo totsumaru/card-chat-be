@@ -5,7 +5,7 @@
 - ログインしているホストのみ
 
 ```
-[POST] /api/chat/[host-id]/edit
+[POST] /api/host/[host-id]/edit
 ```
 
 ### URL Params
@@ -17,7 +17,7 @@
 - `Content-Type`
 
 ```text
-Content-Type: multipart/form-data
+Content-Type: multipart/form-data[README.md](..%2F..%2Fcreate%2FREADME.md)
 ```
 
 - `Authorization`(required)

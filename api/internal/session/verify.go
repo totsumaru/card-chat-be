@@ -9,17 +9,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Res struct {
+// Verifyのレスポンスです
+type VerifyRes struct {
 	HostID string
 	Email  string
 }
 
 // セッションを検証します
-func Verify(c *gin.Context) (bool, Res) {
+func Verify(c *gin.Context) (bool, VerifyRes) {
 	authHeader := c.GetHeader("Authorization")
 	bearerToken := strings.Split(authHeader, " ")
 	if len(bearerToken) != 2 || strings.ToLower(bearerToken[0]) != "bearer" {
-		return false, Res{} // ヘッダーが不正またはトークンが存在しない場合は、空文字列を返します
+		return false, VerifyRes{} // ヘッダーが不正またはトークンが存在しない場合は、空文字列を返します
 	}
 
 	tokenString := bearerToken[1]
@@ -34,28 +35,44 @@ func Verify(c *gin.Context) (bool, Res) {
 	})
 
 	if err != nil || !token.Valid {
-		return false, Res{} // トークンのパースに失敗した場合、またはトークンが無効な場合は、falseと空のResを返します
+		return false, VerifyRes{} // トークンのパースに失敗した場合、またはトークンが無効な場合は、falseと空のResを返します
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return false, Res{} // Claimsの型が期待どおりでない場合は、falseと空のResを返します
+		return false, VerifyRes{} // Claimsの型が期待どおりでない場合は、falseと空のResを返します
 	}
 
 	expiredAt := int64(claims["exp"].(float64))
 	if expiredAt <= time.Now().Unix() {
-		return false, Res{} // トークンが有効期限切れの場合は、falseと空のResを返します
+		return false, VerifyRes{} // トークンが有効期限切れの場合は、falseと空のResを返します
 	}
 
 	id, ok1 := claims["sub"].(string)
 	email, ok2 := claims["email"].(string)
 	if !ok1 || !ok2 {
-		return false, Res{} // IDまたはEmailの抽出に失敗した場合は、falseと空のResを返します
+		return false, VerifyRes{} // IDまたはEmailの抽出に失敗した場合は、falseと空のResを返します
 	}
 
 	// トークンが有効であり、IDとEmailを正常に抽出できた場合は、trueとResを返します
-	return true, Res{
+	return true, VerifyRes{
 		HostID: id,
 		Email:  email,
 	}
+}
+
+// 管理者のメールアドレスです
+var adminMailAddress = []string{
+	"techstart35@gmail.com",
+}
+
+// 管理者であることを検証します
+func IsAdmin(c *gin.Context) bool {
+	_, res := Verify(c)
+	for _, email := range adminMailAddress {
+		if res.Email == email {
+			return true
+		}
+	}
+	return false
 }
