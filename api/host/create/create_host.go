@@ -3,8 +3,8 @@ package create
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
-	"github.com/totsumaru/card-chat-be/api/internal/session"
-	"github.com/totsumaru/card-chat-be/context/host/expose/user"
+	"github.com/totsumaru/card-chat-be/api/internal/verify"
+	host_expose "github.com/totsumaru/card-chat-be/context/host/expose"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
@@ -13,7 +13,7 @@ import (
 func CreateHost(e *gin.Engine, db *gorm.DB) {
 	e.POST("/api/host/create", func(c *gin.Context) {
 		// 認証
-		ok, res := session.Verify(c)
+		ok, res := verify.VerifyToken(c)
 		if !ok {
 			api_err.Send(c, 401, errors.NewError("認証できません"))
 			return
@@ -27,7 +27,7 @@ func CreateHost(e *gin.Engine, db *gorm.DB) {
 
 		// バックエンドの処理を実行します
 		apiErr := func() error {
-			_, err := user.CreateHost(tx, res.HostID)
+			_, err := host_expose.CreateHost(tx, res.HostID)
 			if err != nil {
 				return errors.NewError("ホストを作成できません", err)
 			}

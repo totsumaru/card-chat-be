@@ -1,7 +1,6 @@
-package user
+package expose
 
 import (
-	"github.com/totsumaru/card-chat-be/context/message/expose"
 	"github.com/totsumaru/card-chat-be/context/message/gateway"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/errors"
@@ -9,8 +8,8 @@ import (
 )
 
 // チャットIDの最新のメッセージを取得します
-func FindLatestByChatID(tx *gorm.DB, chatID string) (expose.Res, error) {
-	empty := expose.Res{}
+func FindLatestByChatID(tx *gorm.DB, chatID string) (Res, error) {
+	empty := Res{}
 
 	cID, err := id.RestoreUUID(chatID)
 	if err != nil {
@@ -27,5 +26,5 @@ func FindLatestByChatID(tx *gorm.DB, chatID string) (expose.Res, error) {
 		return empty, errors.NewError("チャットIDで最新のメッセージを取得できません", err)
 	}
 
-	return expose.CreateRes(msg), nil
+	return CreateRes(msg), nil
 }

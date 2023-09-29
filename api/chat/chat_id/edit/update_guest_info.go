@@ -3,8 +3,8 @@ package edit
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
-	"github.com/totsumaru/card-chat-be/api/internal/session"
-	"github.com/totsumaru/card-chat-be/context/chat/expose/user"
+	"github.com/totsumaru/card-chat-be/api/internal/verify"
+	chat_expose "github.com/totsumaru/card-chat-be/context/chat/expose"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
@@ -17,7 +17,7 @@ func UpdateGuestInfo(e *gin.Engine, db *gorm.DB) {
 		memo := c.PostForm("memo")
 
 		// 認証
-		ok, res := session.Verify(c)
+		ok, res := verify.VerifyToken(c)
 		if !ok {
 			api_err.Send(c, 401, errors.NewError("認証できません"))
 			return
@@ -31,7 +31,7 @@ func UpdateGuestInfo(e *gin.Engine, db *gorm.DB) {
 
 		backendErr := func() error {
 			// ホストかどうかを確認
-			chatRes, err := user.FindByID(tx, chatID)
+			chatRes, err := chat_expose.FindByID(tx, chatID)
 			if err != nil {
 				return errors.NewError("IDでチャットを取得できません", err)
 			}
@@ -40,7 +40,7 @@ func UpdateGuestInfo(e *gin.Engine, db *gorm.DB) {
 				return errors.NewError("ホストではありません")
 			}
 
-			_, err = user.UpdateGuestInfo(tx, chatID, displayName, memo)
+			_, err = chat_expose.UpdateGuestInfo(tx, chatID, displayName, memo)
 			if err != nil {
 				return errors.NewError("ゲストの情報を更新できません", err)
 			}

@@ -4,16 +4,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
 	"github.com/totsumaru/card-chat-be/api/internal/res"
-	chatExpose "github.com/totsumaru/card-chat-be/context/chat/expose/user"
-	messageExpose "github.com/totsumaru/card-chat-be/context/message/expose/user"
+	chat_expose "github.com/totsumaru/card-chat-be/context/chat/expose"
+	message_expose "github.com/totsumaru/card-chat-be/context/message/expose"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
 
 // レスポンスです
 type Res struct {
-	Chat     res.ChatRes      `json:"chat"`
-	Messages []res.MessageRes `json:"messages"`
+	Chat     res.ChatRes         `json:"chat"`
+	Messages []res.MessageAPIRes `json:"messages"`
 }
 
 // チャットを取得します
@@ -28,7 +28,7 @@ func GetChatByPasscode(e *gin.Engine, db *gorm.DB) {
 			return
 		}
 
-		if !chatExpose.IsValidPasscode(chatID, passcode) {
+		if !chat_expose.IsValidPasscode(chatID, passcode) {
 			api_err.Send(c, 401, errors.NewError("パスコードが一致しません", tx.Error))
 			return
 		}
@@ -37,7 +37,7 @@ func GetChatByPasscode(e *gin.Engine, db *gorm.DB) {
 
 		backendErr := func() error {
 			// チャットを取得
-			apiChatRes, err := chatExpose.FindByID(tx, chatID)
+			apiChatRes, err := chat_expose.FindByID(tx, chatID)
 			if err != nil {
 				return errors.NewError("IDでチャットを取得できません", err)
 			}
@@ -47,13 +47,13 @@ func GetChatByPasscode(e *gin.Engine, db *gorm.DB) {
 			}
 
 			// 全てのメッセージを取得します
-			msgs, err := messageExpose.FindByChatID(tx, apiChatRes.ID)
+			msgs, err := message_expose.FindByChatID(tx, apiChatRes.ID)
 			if err != nil {
 				return errors.NewError("チャットIDでメッセージを取得できません", err)
 			}
 
 			response.Chat = res.ChatResForGuest(apiChatRes)
-			response.Messages = res.CastToAPIMessagesRes(msgs)
+			response.Messages = res.CastToMessagesAPIRes(msgs)
 
 			return nil
 		}()

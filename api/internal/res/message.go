@@ -3,11 +3,11 @@ package res
 import (
 	"time"
 
-	messageExpose "github.com/totsumaru/card-chat-be/context/message/expose"
+	message_expose "github.com/totsumaru/card-chat-be/context/message/expose"
 )
 
 // メッセージのレスポンスです
-type MessageRes struct {
+type MessageAPIRes struct {
 	ID      string    `json:"id"`
 	ChatID  string    `json:"chat_id"`
 	FromID  string    `json:"from_id"`
@@ -16,11 +16,11 @@ type MessageRes struct {
 }
 
 // バックエンドのレスポンスをAPIのレスポンスに変換します
-func CastToAPIMessagesRes(messages []messageExpose.Res) []MessageRes {
-	res := make([]MessageRes, 0)
+func CastToMessagesAPIRes(messages []message_expose.Res) []MessageAPIRes {
+	res := make([]MessageAPIRes, 0)
 
 	for _, msg := range messages {
-		msgRes := MessageRes{
+		msgRes := MessageAPIRes{
 			ID:      msg.ID,
 			ChatID:  msg.ChatID,
 			FromID:  msg.FromID,

@@ -1,4 +1,4 @@
-package user
+package expose
 
 import (
 	"mime/multipart"
@@ -6,7 +6,6 @@ import (
 	"github.com/totsumaru/card-chat-be/context/host/domain"
 	"github.com/totsumaru/card-chat-be/context/host/domain/avatar"
 	"github.com/totsumaru/card-chat-be/context/host/domain/company"
-	"github.com/totsumaru/card-chat-be/context/host/expose"
 	"github.com/totsumaru/card-chat-be/context/host/gateway"
 	"github.com/totsumaru/card-chat-be/context/host/gateway/cloudflare"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/email"
@@ -32,8 +31,8 @@ type UpdateHostReq struct {
 }
 
 // ホストの情報を更新します
-func UpdateHost(tx *gorm.DB, req UpdateHostReq) (expose.Res, error) {
-	empty := expose.Res{}
+func UpdateHost(tx *gorm.DB, req UpdateHostReq) (Res, error) {
+	empty := Res{}
 
 	hostID, err := id.RestoreUUID(req.ID)
 	if err != nil {
@@ -131,5 +130,5 @@ func UpdateHost(tx *gorm.DB, req UpdateHostReq) (expose.Res, error) {
 		return empty, errors.NewError("DBの更新に失敗しました", err)
 	}
 
-	return expose.CreateRes(h), nil
+	return CreateRes(h), nil
 }

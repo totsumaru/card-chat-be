@@ -3,8 +3,8 @@ package create
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
-	"github.com/totsumaru/card-chat-be/api/internal/session"
-	"github.com/totsumaru/card-chat-be/context/chat/expose/admin"
+	"github.com/totsumaru/card-chat-be/api/internal/verify"
+	chat_expose "github.com/totsumaru/card-chat-be/context/chat/expose"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
@@ -19,7 +19,7 @@ type Res struct {
 func CreateChat(e *gin.Engine, db *gorm.DB) {
 	e.POST("/api/chat/create", func(c *gin.Context) {
 		// 管理者であることを確認します
-		if !session.IsAdmin(c) {
+		if !verify.IsAdmin(c) {
 			api_err.Send(c, 401, errors.NewError("管理者ではありません"))
 			return
 		}
@@ -34,7 +34,7 @@ func CreateChat(e *gin.Engine, db *gorm.DB) {
 
 		// バックエンドの処理を実行します
 		apiErr := func() error {
-			resp, err := admin.CreateChat(tx)
+			resp, err := chat_expose.CreateChatForAdmin(tx)
 			if err != nil {
 				return errors.NewError("新規チャットを作成できません", err)
 			}

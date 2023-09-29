@@ -1,4 +1,4 @@
-package session
+package verify
 
 import (
 	"os"
@@ -10,17 +10,17 @@ import (
 )
 
 // Verifyのレスポンスです
-type VerifyRes struct {
+type Res struct {
 	HostID string
 	Email  string
 }
 
 // セッションを検証します
-func Verify(c *gin.Context) (bool, VerifyRes) {
+func VerifyToken(c *gin.Context) (bool, Res) {
 	authHeader := c.GetHeader("Authorization")
 	bearerToken := strings.Split(authHeader, " ")
 	if len(bearerToken) != 2 || strings.ToLower(bearerToken[0]) != "bearer" {
-		return false, VerifyRes{} // ヘッダーが不正またはトークンが存在しない場合は、空文字列を返します
+		return false, Res{} // ヘッダーが不正またはトークンが存在しない場合は、空文字列を返します
 	}
 
 	tokenString := bearerToken[1]
@@ -35,27 +35,27 @@ func Verify(c *gin.Context) (bool, VerifyRes) {
 	})
 
 	if err != nil || !token.Valid {
-		return false, VerifyRes{} // トークンのパースに失敗した場合、またはトークンが無効な場合は、falseと空のResを返します
+		return false, Res{} // トークンのパースに失敗した場合、またはトークンが無効な場合は、falseと空のResを返します
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return false, VerifyRes{} // Claimsの型が期待どおりでない場合は、falseと空のResを返します
+		return false, Res{} // Claimsの型が期待どおりでない場合は、falseと空のResを返します
 	}
 
 	expiredAt := int64(claims["exp"].(float64))
 	if expiredAt <= time.Now().Unix() {
-		return false, VerifyRes{} // トークンが有効期限切れの場合は、falseと空のResを返します
+		return false, Res{} // トークンが有効期限切れの場合は、falseと空のResを返します
 	}
 
 	id, ok1 := claims["sub"].(string)
 	email, ok2 := claims["email"].(string)
 	if !ok1 || !ok2 {
-		return false, VerifyRes{} // IDまたはEmailの抽出に失敗した場合は、falseと空のResを返します
+		return false, Res{} // IDまたはEmailの抽出に失敗した場合は、falseと空のResを返します
 	}
 
 	// トークンが有効であり、IDとEmailを正常に抽出できた場合は、trueとResを返します
-	return true, VerifyRes{
+	return true, Res{
 		HostID: id,
 		Email:  email,
 	}
@@ -68,7 +68,7 @@ var adminMailAddress = []string{
 
 // 管理者であることを検証します
 func IsAdmin(c *gin.Context) bool {
-	_, res := Verify(c)
+	_, res := VerifyToken(c)
 	for _, email := range adminMailAddress {
 		if res.Email == email {
 			return true

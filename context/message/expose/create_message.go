@@ -1,8 +1,7 @@
-package user
+package expose
 
 import (
 	"github.com/totsumaru/card-chat-be/context/message/domain"
-	"github.com/totsumaru/card-chat-be/context/message/expose"
 	"github.com/totsumaru/card-chat-be/context/message/gateway"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/errors"
@@ -13,8 +12,8 @@ import (
 func CreateMessage(
 	tx *gorm.DB,
 	chatID, fromID, content string,
-) (expose.Res, error) {
-	empty := expose.Res{}
+) (Res, error) {
+	empty := Res{}
 
 	cID, err := id.RestoreUUID(chatID)
 	if err != nil {
@@ -45,5 +44,5 @@ func CreateMessage(
 		return empty, errors.NewError("メッセージのレコードを作成できません", err)
 	}
 
-	return expose.CreateRes(m), nil
+	return CreateRes(m), nil
 }

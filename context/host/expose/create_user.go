@@ -1,8 +1,7 @@
-package user
+package expose
 
 import (
 	"github.com/totsumaru/card-chat-be/context/host/domain"
-	"github.com/totsumaru/card-chat-be/context/host/expose"
 	"github.com/totsumaru/card-chat-be/context/host/gateway"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/errors"
@@ -10,8 +9,8 @@ import (
 )
 
 // ホストを新規作成します
-func CreateHost(tx *gorm.DB, supabaseID string) (expose.Res, error) {
-	empty := expose.Res{}
+func CreateHost(tx *gorm.DB, supabaseID string) (Res, error) {
+	empty := Res{}
 
 	hostID, err := id.RestoreUUID(supabaseID)
 	if err != nil {
@@ -32,5 +31,5 @@ func CreateHost(tx *gorm.DB, supabaseID string) (expose.Res, error) {
 		return empty, errors.NewError("ホストのレコードを作成できません", err)
 	}
 
-	return expose.CreateRes(u), nil
+	return CreateRes(u), nil
 }

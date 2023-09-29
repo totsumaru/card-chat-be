@@ -1,7 +1,6 @@
-package user
+package expose
 
 import (
-	"github.com/totsumaru/card-chat-be/context/chat/expose"
 	"github.com/totsumaru/card-chat-be/context/chat/gateway"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/errors"
@@ -9,8 +8,8 @@ import (
 )
 
 // 既読/未読のフラグを変更します
-func UpdateIsRead(tx *gorm.DB, chatID string, isRead bool) (expose.Res, error) {
-	res := expose.Res{}
+func UpdateIsRead(tx *gorm.DB, chatID string, isRead bool) (Res, error) {
+	res := Res{}
 
 	cID, err := id.RestoreUUID(chatID)
 	if err != nil {
@@ -35,5 +34,5 @@ func UpdateIsRead(tx *gorm.DB, chatID string, isRead bool) (expose.Res, error) {
 		return res, errors.NewError("DBを更新できません", err)
 	}
 
-	return expose.CreateRes(c), nil
+	return CreateRes(c), nil
 }

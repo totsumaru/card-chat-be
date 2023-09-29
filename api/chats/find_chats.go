@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
 	shared_api "github.com/totsumaru/card-chat-be/api/internal/res"
-	"github.com/totsumaru/card-chat-be/api/internal/session"
-	"github.com/totsumaru/card-chat-be/context/chat/expose/user"
+	"github.com/totsumaru/card-chat-be/api/internal/verify"
+	chat_expose "github.com/totsumaru/card-chat-be/context/chat/expose"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
@@ -19,7 +19,7 @@ type Res struct {
 func FindChats(e *gin.Engine, db *gorm.DB) {
 	e.GET("/api/chats", func(c *gin.Context) {
 		// 認証
-		ok, verifyRes := session.Verify(c)
+		ok, verifyRes := verify.VerifyToken(c)
 		if !ok {
 			api_err.Send(c, 401, errors.NewError("認証できません"))
 			return
@@ -34,7 +34,7 @@ func FindChats(e *gin.Engine, db *gorm.DB) {
 		res := Res{}
 
 		backendErr := func() error {
-			allChats, err := user.FindByHostID(tx, verifyRes.HostID)
+			allChats, err := chat_expose.FindByHostID(tx, verifyRes.HostID)
 			if err != nil {
 				return errors.NewError("ホストIDに一致するチャットを取得できません", err)
 			}

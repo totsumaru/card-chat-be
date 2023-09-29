@@ -3,8 +3,8 @@ package edit
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
-	"github.com/totsumaru/card-chat-be/api/internal/session"
-	"github.com/totsumaru/card-chat-be/context/host/expose/user"
+	"github.com/totsumaru/card-chat-be/api/internal/verify"
+	host_expose "github.com/totsumaru/card-chat-be/context/host/expose"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
@@ -15,7 +15,7 @@ func EditHostProfile(e *gin.Engine, db *gorm.DB) {
 		hostID := c.Param("hostID")
 
 		// 認証
-		ok, res := session.Verify(c)
+		ok, res := verify.VerifyToken(c)
 		if !ok || hostID != res.HostID {
 			api_err.Send(c, 401, errors.NewError("認証できません"))
 			return
@@ -35,7 +35,7 @@ func EditHostProfile(e *gin.Engine, db *gorm.DB) {
 
 		// バックエンドの処理を行います
 		backendErr := func() error {
-			req := user.UpdateHostReq{
+			req := host_expose.UpdateHostReq{
 				ID:           hostID,
 				Name:         c.PostForm("name"),
 				AvatarFile:   avatarImageFile,
@@ -48,7 +48,7 @@ func EditHostProfile(e *gin.Engine, db *gorm.DB) {
 				Website:      c.PostForm("website"),
 			}
 
-			_, err = user.UpdateHost(tx, req)
+			_, err = host_expose.UpdateHost(tx, req)
 			if err != nil {
 				return errors.NewError("ホストの情報を変更できません", err)
 			}

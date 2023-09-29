@@ -1,7 +1,6 @@
-package user
+package expose
 
 import (
-	"github.com/totsumaru/card-chat-be/context/message/expose"
 	"github.com/totsumaru/card-chat-be/context/message/gateway"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/errors"
@@ -9,8 +8,8 @@ import (
 )
 
 // IDでメッセージを取得します
-func FindByID(tx *gorm.DB, messageID string) (expose.Res, error) {
-	empty := expose.Res{}
+func FindByID(tx *gorm.DB, messageID string) (Res, error) {
+	empty := Res{}
 
 	mID, err := id.RestoreUUID(messageID)
 	if err != nil {
@@ -27,5 +26,5 @@ func FindByID(tx *gorm.DB, messageID string) (expose.Res, error) {
 		return empty, errors.NewError("IDでチャットを取得できません", err)
 	}
 
-	return expose.CreateRes(res), nil
+	return CreateRes(res), nil
 }

@@ -1,8 +1,7 @@
-package user
+package expose
 
 import (
 	"github.com/totsumaru/card-chat-be/context/chat/domain/guest"
-	"github.com/totsumaru/card-chat-be/context/chat/expose"
 	"github.com/totsumaru/card-chat-be/context/chat/gateway"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/email"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
@@ -11,8 +10,8 @@ import (
 )
 
 // ゲストの通知用Emailを更新します
-func UpdateEmail(tx *gorm.DB, chatID, mail string) (expose.Res, error) {
-	empty := expose.Res{}
+func UpdateEmail(tx *gorm.DB, chatID, mail string) (Res, error) {
+	empty := Res{}
 
 	cID, err := id.RestoreUUID(chatID)
 	if err != nil {
@@ -48,5 +47,5 @@ func UpdateEmail(tx *gorm.DB, chatID, mail string) (expose.Res, error) {
 		return empty, errors.NewError("DBを更新できません", err)
 	}
 
-	return expose.CreateRes(c), nil
+	return CreateRes(c), nil
 }

@@ -1,4 +1,4 @@
-package user
+package expose
 
 import "github.com/totsumaru/card-chat-be/context/chat/domain"
 

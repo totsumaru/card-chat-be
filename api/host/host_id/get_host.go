@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
 	shared_api "github.com/totsumaru/card-chat-be/api/internal/res"
-	host_expose "github.com/totsumaru/card-chat-be/context/host/expose/user"
+	host_expose "github.com/totsumaru/card-chat-be/context/host/expose"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
