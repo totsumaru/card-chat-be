@@ -20,14 +20,12 @@
 Authorization: Bearer [token]
 ```
 
-### Body
+### Body(Form)
 
-```json
-{
-  "id": "cb273580-8a04-4421-8141-e2bc48a89069",
-  "display_name": "鈴木 太郎"
-}
-```
+| Field Name     | Type   | 
+|----------------|--------|
+| `display_name` | string |
+| `memo`         | String |
 
 ### Success
 
@@ -44,7 +42,7 @@ Authorization: Bearer [token]
 ```json
 {
   "error": {
-    "message": "ホストではありません"
+    "message": "認証できません"
   }
 }
 ```

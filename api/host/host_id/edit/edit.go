@@ -21,9 +21,9 @@ func EditHostProfile(e *gin.Engine, db *gorm.DB) {
 			return
 		}
 
-		avatarImageFile, apiErr := c.FormFile("avatar")
-		if apiErr != nil {
-			api_err.Send(c, 500, errors.NewError("画像ファイルを取得できません", apiErr))
+		avatarImageFile, err := c.FormFile("avatar")
+		if err != nil {
+			api_err.Send(c, 500, errors.NewError("画像ファイルを取得できません", err))
 			return
 		}
 
@@ -34,7 +34,7 @@ func EditHostProfile(e *gin.Engine, db *gorm.DB) {
 		}
 
 		// バックエンドの処理を行います
-		apiErr = func() error {
+		backendErr := func() error {
 			req := user.UpdateHostReq{
 				ID:           hostID,
 				Name:         c.PostForm("name"),
@@ -48,16 +48,16 @@ func EditHostProfile(e *gin.Engine, db *gorm.DB) {
 				Website:      c.PostForm("website"),
 			}
 
-			_, apiErr = user.UpdateHost(tx, req)
-			if apiErr != nil {
-				return errors.NewError("ホストの情報を変更できません", apiErr)
+			_, err = user.UpdateHost(tx, req)
+			if err != nil {
+				return errors.NewError("ホストの情報を変更できません", err)
 			}
 
 			return nil
 		}()
-		if apiErr != nil {
+		if backendErr != nil {
 			tx.Rollback()
-			api_err.Send(c, 500, errors.NewError("バックエンドの処理が失敗しました", apiErr))
+			api_err.Send(c, 500, errors.NewError("バックエンドの処理が失敗しました", backendErr))
 			return
 		}
 

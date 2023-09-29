@@ -89,6 +89,32 @@ func (g Gateway) FindByChatID(chatID id.UUID) ([]domain.Message, error) {
 	return domainMessages, nil
 }
 
+// チャットIDの最新のメッセージを取得します
+func (g Gateway) FindLatestByChatID(chatID id.UUID) (domain.Message, error) {
+	res := domain.Message{}
+	var dbMessage database.MessageSchema
+
+	// Orderメソッドを使ってcreatedの降順でソートし、Firstメソッドで最新のメッセージを取得
+	if err := g.tx.Where(
+		"chat_id = ?",
+		chatID.String(),
+	).Order("created desc").First(&dbMessage).Error; err != nil {
+		// レコードが見つからない場合は空のメッセージを返す
+		if err == gorm.ErrRecordNotFound {
+			return res, nil
+		}
+		return res, errors.NewError("取得できません", err)
+	}
+
+	// DBのスキーマをドメインモデルに変換
+	domainMessage, err := castToDomainModelMessage(dbMessage)
+	if err != nil {
+		return res, errors.NewError("DBをドメインモデルに変換できません", err)
+	}
+
+	return domainMessage, nil
+}
+
 // ドメインモデルをDBの構造体に変換します
 func castToDBMessage(m domain.Message) database.MessageSchema {
 	return database.MessageSchema{

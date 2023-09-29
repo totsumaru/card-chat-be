@@ -38,6 +38,7 @@ func GetChat(e *gin.Engine, db *gorm.DB) {
 		// 認証
 		isLogin, verifyRes := session.Verify(c)
 
+		// TODO: txのdefer処理(必ずcommit/role-backさせる)
 		tx := db.Begin()
 		if tx.Error != nil {
 			api_err.Send(c, 500, errors.NewError("Txを開始できません", tx.Error))
