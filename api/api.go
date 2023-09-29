@@ -5,6 +5,7 @@ import (
 	"github.com/totsumaru/card-chat-be/api/chat/chat_id"
 	"github.com/totsumaru/card-chat-be/api/chat/chat_id/edit"
 	"github.com/totsumaru/card-chat-be/api/chat/chat_id/email"
+	"github.com/totsumaru/card-chat-be/api/chat/chat_id/message"
 	"github.com/totsumaru/card-chat-be/api/chat/chat_id/passcode"
 	"github.com/totsumaru/card-chat-be/api/chat/chat_id/read"
 	"github.com/totsumaru/card-chat-be/api/chat/chat_id/start"
@@ -27,6 +28,7 @@ func RegisterRouter(e *gin.Engine, db *gorm.DB) {
 	passcode.GetChatByPasscode(e, db)
 	read.ChangeToRead(e, db)
 	start.RegisterHostID(e, db)
+	message.SendMessage(e, db)
 
 	// `/chats`
 	chats.FindChats(e, db)

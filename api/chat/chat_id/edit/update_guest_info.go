@@ -13,6 +13,7 @@ import (
 func UpdateGuestInfo(e *gin.Engine, db *gorm.DB) {
 	e.POST("/api/chat/:chatID/edit", func(c *gin.Context) {
 		chatID := c.Param("chatID")
+
 		displayName := c.PostForm("display_name")
 		memo := c.PostForm("memo")
 
