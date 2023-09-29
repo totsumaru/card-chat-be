@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"github.com/totsumaru/card-chat-be/context/host/domain"
+	"github.com/totsumaru/card-chat-be/context/host/domain/avatar"
 	"github.com/totsumaru/card-chat-be/context/host/domain/company"
 	"github.com/totsumaru/card-chat-be/shared/database"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/email"
@@ -114,16 +115,17 @@ func (g Gateway) FindByIDForUpdate(id id.UUID) (domain.Host, error) {
 // ドメインモデルをDBの構造体に変換します
 func castToDBHost(u domain.Host) database.HostSchema {
 	return database.HostSchema{
-		ID:           u.ID().String(),
-		Name:         u.Name().String(),
-		AvatarURL:    u.AvatarURL().String(),
-		Headline:     u.Headline().String(),
-		Introduction: u.Introduction().String(),
-		CompanyName:  u.Company().Name().String(),
-		Position:     u.Company().Position().String(),
-		Tel:          u.Company().Tel().String(),
-		Email:        u.Company().Email().String(),
-		Website:      u.Company().Website().String(),
+		ID:            u.ID().String(),
+		Name:          u.Name().String(),
+		AvatarImageID: u.Avatar().CloudflareImageID().String(),
+		AvatarURL:     u.Avatar().URL().String(),
+		Headline:      u.Headline().String(),
+		Introduction:  u.Introduction().String(),
+		CompanyName:   u.Company().Name().String(),
+		Position:      u.Company().Position().String(),
+		Tel:           u.Company().Tel().String(),
+		Email:         u.Company().Email().String(),
+		Website:       u.Company().Website().String(),
 	}
 }
 
@@ -141,9 +143,18 @@ func castToDomainModel(dbHost database.HostSchema) (domain.Host, error) {
 		return res, errors.NewError("名前を作成できません", err)
 	}
 
-	avatar, err := url.NewURL(dbHost.AvatarURL)
+	// アバター
+	imageID, err := id.RestoreUUID(dbHost.AvatarImageID)
+	if err != nil {
+		return res, errors.NewError("画像IDを作成できません", err)
+	}
+	avatarURL, err := url.NewURL(dbHost.AvatarURL)
 	if err != nil {
 		return res, errors.NewError("アバターURLを作成できません", err)
+	}
+	avt, err := avatar.NewAvatar(imageID, avatarURL)
+	if err != nil {
+		return res, errors.NewError("アバターを作成できません", err)
 	}
 
 	headline, err := domain.NewHeadline(dbHost.Headline)
@@ -183,7 +194,7 @@ func castToDomainModel(dbHost database.HostSchema) (domain.Host, error) {
 	}
 
 	res, err = domain.RestoreHost(
-		hID, name, avatar, headline, intro, comp, dbHost.Created, dbHost.Updated,
+		hID, name, avt, headline, intro, comp, dbHost.Created, dbHost.Updated,
 	)
 	if err != nil {
 		return res, errors.NewError("ホストを復元できません", err)

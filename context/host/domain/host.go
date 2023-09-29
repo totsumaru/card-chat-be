@@ -3,9 +3,9 @@ package domain
 import (
 	"time"
 
+	"github.com/totsumaru/card-chat-be/context/host/domain/avatar"
 	"github.com/totsumaru/card-chat-be/context/host/domain/company"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
-	"github.com/totsumaru/card-chat-be/shared/domain_model/url"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"github.com/totsumaru/card-chat-be/shared/now"
 )
@@ -14,7 +14,7 @@ import (
 type Host struct {
 	id           id.UUID // supabaseのIDと一致します
 	name         Name
-	avatarURL    url.URL
+	avatar       avatar.Avatar
 	headline     Headline
 	introduction Introduction
 	company      company.Company
@@ -41,7 +41,7 @@ func NewHost(id id.UUID) (Host, error) {
 func RestoreHost(
 	id id.UUID,
 	name Name,
-	avatarURL url.URL,
+	avatarURL avatar.Avatar,
 	headline Headline,
 	introduction Introduction,
 	company company.Company,
@@ -51,7 +51,7 @@ func RestoreHost(
 	res := Host{
 		id:           id,
 		name:         name,
-		avatarURL:    avatarURL,
+		avatar:       avatarURL,
 		headline:     headline,
 		introduction: introduction,
 		company:      company,
@@ -69,13 +69,13 @@ func RestoreHost(
 // ホスト情報を更新します
 func (h *Host) UpdateHost(
 	name Name,
-	avatarURL url.URL,
+	avatar avatar.Avatar,
 	headline Headline,
 	introduction Introduction,
 	company company.Company,
 ) error {
 	h.name = name
-	h.avatarURL = avatarURL
+	h.avatar = avatar
 	h.headline = headline
 	h.introduction = introduction
 	h.company = company
@@ -99,8 +99,8 @@ func (h Host) Name() Name {
 }
 
 // アバターURLを取得します
-func (h Host) AvatarURL() url.URL {
-	return h.avatarURL
+func (h Host) Avatar() avatar.Avatar {
+	return h.avatar
 }
 
 // ヘッドラインを取得します

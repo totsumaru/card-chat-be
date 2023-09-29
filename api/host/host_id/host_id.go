@@ -1,11 +1,10 @@
 package host_id
 
 import (
-	"log"
-
 	"github.com/gin-gonic/gin"
+	shared_api "github.com/totsumaru/card-chat-be/api/internal"
+	"github.com/totsumaru/card-chat-be/api/internal/api_err"
 	"github.com/totsumaru/card-chat-be/context/host/expose/user"
-	shared_api "github.com/totsumaru/card-chat-be/shared/api"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
@@ -22,8 +21,7 @@ func Host(e *gin.Engine, db *gorm.DB) {
 
 		tx := db.Begin()
 		if tx.Error != nil {
-			log.Println(errors.NewError("トランザクションエラーが発生しました", tx.Error))
-			c.JSON(500, "トランザクションエラーが発生しました")
+			api_err.Send(c, 500, errors.NewError("Txを開始できません", tx.Error))
 			return
 		}
 
@@ -51,15 +49,12 @@ func Host(e *gin.Engine, db *gorm.DB) {
 		}()
 		if err != nil {
 			tx.Rollback()
-			log.Println(errors.NewError("バックエンドの処理が失敗しました", err))
-			c.JSON(500, "エラーが発生しました")
+			api_err.Send(c, 500, errors.NewError("バックエンドの処理が失敗しました", err))
 			return
 		}
 
 		tx.Commit()
 
-		c.JSON(200, gin.H{
-			"hostID": hostID,
-		})
+		c.JSON(200, res)
 	})
 }

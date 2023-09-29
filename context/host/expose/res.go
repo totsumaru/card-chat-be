@@ -29,7 +29,7 @@ func CreateRes(u domain.Host) Res {
 	res := Res{}
 	res.ID = u.ID().String()
 	res.Name = u.Name().String()
-	res.AvatarURL = u.AvatarURL().String()
+	res.AvatarURL = u.Avatar().URL().String()
 	res.Headline = u.Headline().String()
 	res.Introduction = u.Introduction().String()
 	res.Company.Name = u.Company().Name().String()

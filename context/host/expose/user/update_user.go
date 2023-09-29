@@ -1,10 +1,14 @@
 package user
 
 import (
+	"mime/multipart"
+
 	"github.com/totsumaru/card-chat-be/context/host/domain"
+	"github.com/totsumaru/card-chat-be/context/host/domain/avatar"
 	"github.com/totsumaru/card-chat-be/context/host/domain/company"
 	"github.com/totsumaru/card-chat-be/context/host/expose"
 	"github.com/totsumaru/card-chat-be/context/host/gateway"
+	"github.com/totsumaru/card-chat-be/context/host/gateway/cloudflare"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/email"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/tel"
@@ -17,7 +21,7 @@ import (
 type UpdateHostReq struct {
 	ID           string
 	Name         string
-	AvatarURL    string
+	AvatarFile   *multipart.FileHeader
 	Headline     string
 	Introduction string
 	CompanyName  string
@@ -47,14 +51,43 @@ func UpdateHost(tx *gorm.DB, req UpdateHostReq) (expose.Res, error) {
 		return empty, errors.NewError("IDでホストを取得できません", err)
 	}
 
+	cloudflareImageID := h.Avatar().CloudflareImageID()
+	avatarURL := h.Avatar().URL()
+
+	// 新規画像がある場合
+	if req.AvatarFile.Size != 0 {
+		// CloudflareImageに画像をアップロードします
+		avatarRes, err := cloudflare.UploadImageToCloudflare(h.ID(), req.AvatarFile)
+		if err != nil {
+			return empty, errors.NewError("ファイルをアップロードできません", err)
+		}
+
+		cloudflareImageID, err = id.RestoreUUID(avatarRes.ImageID)
+		if err != nil {
+			return empty, errors.NewError("画像IDを作成できません", err)
+		}
+
+		avatarURL, err = url.NewURL(avatarRes.URL)
+		if err != nil {
+			return empty, errors.NewError("画像URLを作成できません", err)
+		}
+
+		// 既存画像がある場合は削除します
+		if avatarRes.ImageID != "" {
+			if err = cloudflare.DeleteImageFromCloudflare(cloudflareImageID); err != nil {
+				return empty, errors.NewError("現在のファイルを削除できません", err)
+			}
+		}
+	}
+
 	// 構造体を作成します
 	name, err := domain.NewName(req.Name)
 	if err != nil {
 		return empty, errors.NewError("名前を作成できません", err)
 	}
-	avatar, err := url.NewURL(req.AvatarURL)
+	avt, err := avatar.NewAvatar(cloudflareImageID, avatarURL)
 	if err != nil {
-		return empty, errors.NewError("アバターURLを作成できません", err)
+		return empty, errors.NewError("アバターを作成できません", err)
 	}
 	headline, err := domain.NewHeadline(req.Headline)
 	if err != nil {
@@ -90,7 +123,7 @@ func UpdateHost(tx *gorm.DB, req UpdateHostReq) (expose.Res, error) {
 		return empty, errors.NewError("会社を作成できません", err)
 	}
 
-	if err = h.UpdateHost(name, avatar, headline, intro, comp); err != nil {
+	if err = h.UpdateHost(name, avt, headline, intro, comp); err != nil {
 		return empty, errors.NewError("ホストを更新できません", err)
 	}
 

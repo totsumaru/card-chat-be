@@ -8,18 +8,19 @@ const (
 
 // ホストのスキーマです
 type HostSchema struct {
-	ID           string `gorm:"type:uuid;primary_key;"`
-	Name         string
-	AvatarURL    string
-	Headline     string
-	Introduction string
-	CompanyName  string
-	Position     string
-	Tel          string
-	Email        string
-	Website      string
-	Created      time.Time
-	Updated      time.Time
+	ID            string `gorm:"type:uuid;primary_key;"`
+	Name          string
+	AvatarImageID string
+	AvatarURL     string
+	Headline      string
+	Introduction  string
+	CompanyName   string
+	Position      string
+	Tel           string
+	Email         string
+	Website       string
+	Created       time.Time
+	Updated       time.Time
 }
 
 // チャットのDBです

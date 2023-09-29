@@ -14,20 +14,31 @@
 
 ### Header
 
+- `Content-Type`
+
+```text
+Content-Type: multipart/form-data
+```
+
 - `Authorization`(required)
 
 ```text
 Authorization: Bearer [token]
 ```
 
-### Body
+### Body(Form)
 
-```json
-{
-  "id": "cb273580-8a04-4421-8141-e2bc48a89069",
-  "name": "鈴木 太郎"
-}
-```
+| Field Name     | Type   | 
+|----------------|--------|
+| `avatar`       | File   |
+| `name`         | String |
+| `headline`     | String |
+| `introduction` | String |
+| `company_name` | String |
+| `position`     | String |
+| `tel`          | String |
+| `email`        | String |
+| `website`      | String |
 
 ### Success
 
@@ -39,12 +50,12 @@ Authorization: Bearer [token]
 
 ### Error
 
-- code: `401` | `404` | `500`
+- code: `401` | `500`
 
 ```json
 {
   "error": {
-    "message": "ログインしてください"
+    "message": "認証できません"
   }
 }
 ```
