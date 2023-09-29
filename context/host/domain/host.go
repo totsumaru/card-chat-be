@@ -10,8 +10,6 @@ import (
 	"github.com/totsumaru/card-chat-be/shared/now"
 )
 
-// TODO: 全てのドメインモデルのvalidationで空の値を許容するかを確認
-
 // ホストです
 type Host struct {
 	id           id.UUID // supabaseのIDと一致します

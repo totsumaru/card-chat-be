@@ -13,34 +13,24 @@ import (
 func CreateHost(e *gin.Engine, db *gorm.DB) {
 	e.POST("/api/host/create", func(c *gin.Context) {
 		// 認証
-		ok, res := verify.VerifyToken(c)
+		ok, verifyRes := verify.VerifyToken(c)
 		if !ok {
 			api_err.Send(c, 401, errors.NewError("認証できません"))
 			return
 		}
 
-		tx := db.Begin()
-		if tx.Error != nil {
-			api_err.Send(c, 500, errors.NewError("Txを開始できません", tx.Error))
-			return
-		}
-
-		// バックエンドの処理を実行します
-		apiErr := func() error {
-			_, err := host_expose.CreateHost(tx, res.HostID)
+		err := db.Transaction(func(tx *gorm.DB) error {
+			_, err := host_expose.CreateHost(tx, verifyRes.HostID)
 			if err != nil {
 				return errors.NewError("ホストを作成できません", err)
 			}
 
 			return nil
-		}()
-		if apiErr != nil {
-			tx.Rollback()
-			api_err.Send(c, 500, errors.NewError("バックエンドの処理が失敗しました", apiErr))
+		})
+		if err != nil {
+			api_err.Send(c, 500, errors.NewError("Txエラー", err))
 			return
 		}
-
-		tx.Commit()
 
 		c.JSON(200, "")
 	})

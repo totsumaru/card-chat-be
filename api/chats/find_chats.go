@@ -12,7 +12,7 @@ import (
 
 // レスポンスです
 type Res struct {
-	Chats []shared_api.ChatRes `json:"chats"`
+	Chats []shared_api.ChatAPIRes `json:"chats"`
 }
 
 // 自分がホストの全てのチャットを取得します
@@ -25,23 +25,17 @@ func FindChats(e *gin.Engine, db *gorm.DB) {
 			return
 		}
 
-		tx := db.Begin()
-		if tx.Error != nil {
-			api_err.Send(c, 500, errors.NewError("Txを開始できません", tx.Error))
-			return
-		}
-
 		res := Res{}
 
 		backendErr := func() error {
-			allChats, err := chat_expose.FindByHostID(tx, verifyRes.HostID)
+			allChats, err := chat_expose.FindByHostID(db, verifyRes.HostID)
 			if err != nil {
 				return errors.NewError("ホストIDに一致するチャットを取得できません", err)
 			}
 
-			resChats := make([]shared_api.ChatRes, 0)
+			resChats := make([]shared_api.ChatAPIRes, 0)
 			for _, chat := range allChats {
-				resChats = append(resChats, shared_api.ChatResForHost(chat))
+				resChats = append(resChats, shared_api.CastToChatAPIResForHost(chat))
 			}
 
 			res.Chats = resChats
@@ -49,12 +43,9 @@ func FindChats(e *gin.Engine, db *gorm.DB) {
 			return nil
 		}()
 		if backendErr != nil {
-			tx.Rollback()
 			api_err.Send(c, 500, errors.NewError("バックエンドの処理が失敗しました", backendErr))
 			return
 		}
-
-		tx.Commit()
 
 		c.JSON(200, res)
 	})

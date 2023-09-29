@@ -174,9 +174,13 @@ func castToDomainModelChat(dbChat database.ChatSchema) (domain.Chat, error) {
 		return res, errors.NewError("パスコードを復元できません", err)
 	}
 
-	hostID, err := id.RestoreUUID(dbChat.HostID)
-	if err != nil {
-		return res, errors.NewError("ホストIDを復元できません", err)
+	// 空を許容するため、UUIDのバリデーションに引っかからないため、空の構造体を入れる
+	hostID := id.UUID{}
+	if dbChat.HostID != "" {
+		hostID, err = id.RestoreUUID(dbChat.HostID)
+		if err != nil {
+			return res, errors.NewError("ホストIDを復元できません", err)
+		}
 	}
 
 	// ゲスト

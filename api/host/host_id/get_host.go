@@ -11,7 +11,7 @@ import (
 
 // レスポンスです
 type Res struct {
-	Host shared_api.HostRes `json:"host"`
+	Host shared_api.HostAPIRes `json:"host"`
 }
 
 // ホストの情報を取得します
@@ -19,32 +19,23 @@ func GetHost(e *gin.Engine, db *gorm.DB) {
 	e.GET("/api/host/:hostID", func(c *gin.Context) {
 		hostID := c.Param("hostID")
 
-		tx := db.Begin()
-		if tx.Error != nil {
-			api_err.Send(c, 500, errors.NewError("Txを開始できません", tx.Error))
-			return
-		}
-
 		res := Res{}
 
 		// ホストを取得します
-		backendErr := func() error {
-			backendHost, err := host_expose.FindByID(tx, hostID)
+		err := func() error {
+			backendHost, err := host_expose.FindByID(db, hostID)
 			if err != nil {
 				return errors.NewError("ホストが取得できません", err)
 			}
 
-			res.Host = shared_api.CastToAPIHostRes(backendHost)
+			res.Host = shared_api.CastToHostAPIRes(backendHost)
 
 			return nil
 		}()
-		if backendErr != nil {
-			tx.Rollback()
-			api_err.Send(c, 500, errors.NewError("バックエンドの処理が失敗しました", backendErr))
+		if err != nil {
+			api_err.Send(c, 500, errors.NewError("バックエンドの処理が失敗しました", err))
 			return
 		}
-
-		tx.Commit()
 
 		c.JSON(200, res)
 	})

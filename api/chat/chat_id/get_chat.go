@@ -26,7 +26,7 @@ const (
 // レスポンスです
 type Res struct {
 	Status   ChatStatus          `json:"status"`
-	Chat     res.ChatRes         `json:"chat"`
+	Chat     res.ChatAPIRes      `json:"chat"`
 	Messages []res.MessageAPIRes `json:"messages"`
 }
 
@@ -38,17 +38,10 @@ func GetChat(e *gin.Engine, db *gorm.DB) {
 		// 認証
 		isLogin, verifyRes := verify.VerifyToken(c)
 
-		// TODO: txのdefer処理(必ずcommit/role-backさせる)
-		tx := db.Begin()
-		if tx.Error != nil {
-			api_err.Send(c, 500, errors.NewError("Txを開始できません", tx.Error))
-			return
-		}
-
 		// チャットを取得
-		apiChatRes, err := chat_expose.FindByID(tx, chatID)
+		apiChatRes, err := chat_expose.FindByID(db, chatID)
 		if err != nil {
-			api_err.Send(c, 404, errors.NewError("チャットを取得できません", tx.Error))
+			api_err.Send(c, 404, errors.NewError("チャットを取得できません", err))
 			return
 		}
 
@@ -58,14 +51,14 @@ func GetChat(e *gin.Engine, db *gorm.DB) {
 			if isLogin {
 				c.JSON(200, Res{
 					Status:   statusFirstIsLogin,
-					Chat:     res.ChatRes{},
+					Chat:     res.ChatAPIRes{},
 					Messages: make([]res.MessageAPIRes, 0),
 				})
 				return
 			} else {
 				c.JSON(200, Res{
 					Status:   statusFirstNotLogin,
-					Chat:     res.ChatRes{},
+					Chat:     res.ChatAPIRes{},
 					Messages: make([]res.MessageAPIRes, 0),
 				})
 				return
@@ -76,24 +69,24 @@ func GetChat(e *gin.Engine, db *gorm.DB) {
 			// 自分がホストの場合
 			if apiChatRes.HostID == verifyRes.HostID {
 				// 全てのメッセージを取得します
-				msgs, err := message_expose.FindByChatID(tx, apiChatRes.ID)
+				msgs, err := message_expose.FindByChatID(db, apiChatRes.ID)
 				if err != nil {
-					api_err.Send(c, 500, errors.NewError("チャットIDでメッセージを取得できません", tx.Error))
+					api_err.Send(c, 500, errors.NewError("チャットIDでメッセージを取得できません", err))
 					return
 				}
 
 				c.JSON(200, Res{
 					Status:   statusHost,
-					Chat:     res.ChatResForHost(apiChatRes),
+					Chat:     res.CastToChatAPIResForHost(apiChatRes),
 					Messages: res.CastToMessagesAPIRes(msgs),
 				})
 				return
 			} else {
 				// 自分がホストではない(ゲストorビジター)場合
 				// 全てのメッセージを取得します
-				msgs, err := message_expose.FindByChatID(tx, apiChatRes.ID)
+				msgs, err := message_expose.FindByChatID(db, apiChatRes.ID)
 				if err != nil {
-					api_err.Send(c, 500, errors.NewError("チャットIDでメッセージを取得できません", tx.Error))
+					api_err.Send(c, 500, errors.NewError("チャットIDでメッセージを取得できません", err))
 					return
 				}
 
@@ -102,14 +95,14 @@ func GetChat(e *gin.Engine, db *gorm.DB) {
 				if err == nil && cookiePasscode == apiChatRes.Passcode {
 					c.JSON(200, Res{
 						Status:   statusGuest,
-						Chat:     res.ChatResForGuest(apiChatRes),
+						Chat:     res.CastToChatAPIResForGuest(apiChatRes),
 						Messages: res.CastToMessagesAPIRes(msgs),
 					})
 					return
 				} else {
 					c.JSON(200, Res{
 						Status:   statusVisitor,
-						Chat:     res.ChatRes{},
+						Chat:     res.ChatAPIRes{},
 						Messages: make([]res.MessageAPIRes, 0),
 					})
 					return

@@ -1,6 +1,8 @@
 package edit
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
 	"github.com/totsumaru/card-chat-be/api/internal/verify"
@@ -21,20 +23,13 @@ func EditHostProfile(e *gin.Engine, db *gorm.DB) {
 			return
 		}
 
-		avatarImageFile, err := c.FormFile("avatar")
-		if err != nil {
-			api_err.Send(c, 500, errors.NewError("画像ファイルを取得できません", err))
-			return
-		}
+		err := db.Transaction(func(tx *gorm.DB) error {
+			// ファイルが添付されていない場合はエラーにならない
+			avatarImageFile, err := c.FormFile("avatar")
+			if err != nil && err != http.ErrMissingFile {
+				return errors.NewError("ファイルを取得できません")
+			}
 
-		tx := db.Begin()
-		if tx.Error != nil {
-			api_err.Send(c, 500, errors.NewError("Txを開始できません", tx.Error))
-			return
-		}
-
-		// バックエンドの処理を行います
-		backendErr := func() error {
 			req := host_expose.UpdateHostReq{
 				ID:           hostID,
 				Name:         c.PostForm("name"),
@@ -54,14 +49,11 @@ func EditHostProfile(e *gin.Engine, db *gorm.DB) {
 			}
 
 			return nil
-		}()
-		if backendErr != nil {
-			tx.Rollback()
-			api_err.Send(c, 500, errors.NewError("バックエンドの処理が失敗しました", backendErr))
+		})
+		if err != nil {
+			api_err.Send(c, 500, errors.NewError("Txエラー", err))
 			return
 		}
-
-		tx.Commit()
 
 		c.JSON(200, "")
 	})

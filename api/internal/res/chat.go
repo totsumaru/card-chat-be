@@ -7,7 +7,7 @@ import (
 )
 
 // チャットのレスポンスです
-type ChatRes struct {
+type ChatAPIRes struct {
 	ID       string `json:"id"`
 	Passcode string `json:"passcode"`
 	HostID   string `json:"host_id"`
@@ -24,8 +24,8 @@ type ChatRes struct {
 // ホスト用のチャットのレスポンスです
 //
 // ゲストが設定した通知用のEmailはホストには送信しません。
-func ChatResForHost(backendRes chatExpose.Res) ChatRes {
-	res := castToAPIChatRes(backendRes)
+func CastToChatAPIResForHost(backendRes chatExpose.Res) ChatAPIRes {
+	res := castToChatAPIRes(backendRes)
 	res.Guest.Email = ""
 
 	return res
@@ -34,8 +34,8 @@ func ChatResForHost(backendRes chatExpose.Res) ChatRes {
 // ゲスト用のチャットのレスポンスです
 //
 // ホストが設定した`表示名`,`メモ`はゲストには送信しません。
-func ChatResForGuest(backendRes chatExpose.Res) ChatRes {
-	res := castToAPIChatRes(backendRes)
+func CastToChatAPIResForGuest(backendRes chatExpose.Res) ChatAPIRes {
+	res := castToChatAPIRes(backendRes)
 	res.Guest.DisplayName = ""
 	res.Guest.Memo = ""
 
@@ -43,17 +43,17 @@ func ChatResForGuest(backendRes chatExpose.Res) ChatRes {
 }
 
 // バックエンドのレスポンスをAPIのレスポンスに変換します
-func castToAPIChatRes(backendRes chatExpose.Res) ChatRes {
-	res := ChatRes{}
-	res.ID = backendRes.Passcode
-	res.Passcode = backendRes.Passcode
-	res.HostID = backendRes.HostID
-	res.Guest.DisplayName = backendRes.Guest.DisplayName
-	res.Guest.Memo = backendRes.Guest.Memo
-	res.Guest.Email = backendRes.Guest.Email
-	res.IsRead = backendRes.IsRead
-	res.IsClosed = backendRes.IsClosed
-	res.LastMessage = backendRes.Timestamp.LastMessage
+func castToChatAPIRes(backendResChat chatExpose.Res) ChatAPIRes {
+	res := ChatAPIRes{}
+	res.ID = backendResChat.Passcode
+	res.Passcode = backendResChat.Passcode
+	res.HostID = backendResChat.HostID
+	res.Guest.DisplayName = backendResChat.Guest.DisplayName
+	res.Guest.Memo = backendResChat.Guest.Memo
+	res.Guest.Email = backendResChat.Guest.Email
+	res.IsRead = backendResChat.IsRead
+	res.IsClosed = backendResChat.IsClosed
+	res.LastMessage = backendResChat.Timestamp.LastMessage
 
 	return res
 }

@@ -21,13 +21,7 @@ func ChangeToRead(e *gin.Engine, db *gorm.DB) {
 			return
 		}
 
-		tx := db.Begin()
-		if tx.Error != nil {
-			api_err.Send(c, 500, errors.NewError("Txを開始できません", tx.Error))
-			return
-		}
-
-		backendErr := func() error {
+		err := db.Transaction(func(tx *gorm.DB) error {
 			// ホストかどうかを確認
 			chatRes, err := chat_expose.FindByID(tx, chatID)
 			if err != nil {
@@ -44,14 +38,11 @@ func ChangeToRead(e *gin.Engine, db *gorm.DB) {
 			}
 
 			return nil
-		}
-		if backendErr != nil {
-			tx.Rollback()
-			api_err.Send(c, 500, errors.NewError("バックエンドの処理が失敗しました", backendErr()))
+		})
+		if err != nil {
+			api_err.Send(c, 500, errors.NewError("Txエラー", err))
 			return
 		}
-
-		tx.Commit()
 
 		c.JSON(200, "")
 	})

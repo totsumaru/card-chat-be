@@ -3,7 +3,7 @@ package res
 import host_expose "github.com/totsumaru/card-chat-be/context/host/expose"
 
 // ホストのレスポンスです
-type HostRes struct {
+type HostAPIRes struct {
 	ID           string `json:"id"`
 	Name         string `json:"name"`
 	AvatarURL    string `json:"avatar_url"`
@@ -19,8 +19,8 @@ type HostRes struct {
 }
 
 // バックエンドのレスポンスをAPIのレスポンスに変換します
-func CastToAPIHostRes(backendResHost host_expose.Res) HostRes {
-	res := HostRes{}
+func CastToHostAPIRes(backendResHost host_expose.Res) HostAPIRes {
+	res := HostAPIRes{}
 	res.ID = backendResHost.ID
 	res.Name = backendResHost.Name
 	res.AvatarURL = backendResHost.AvatarURL

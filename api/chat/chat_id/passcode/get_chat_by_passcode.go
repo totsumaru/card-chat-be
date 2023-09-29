@@ -12,30 +12,24 @@ import (
 
 // レスポンスです
 type Res struct {
-	Chat     res.ChatRes         `json:"chat"`
+	Chat     res.ChatAPIRes      `json:"chat"`
 	Messages []res.MessageAPIRes `json:"messages"`
 }
 
 // チャットを取得します
 func GetChatByPasscode(e *gin.Engine, db *gorm.DB) {
-	e.POST("/api/chat/:chatID/passcode", func(c *gin.Context) {
+	e.GET("/api/chat/:chatID/passcode", func(c *gin.Context) {
 		chatID := c.Param("chatID")
 		passcode := c.GetHeader("Passcode")
 
-		tx := db.Begin()
-		if tx.Error != nil {
-			api_err.Send(c, 500, errors.NewError("Txを開始できません", tx.Error))
-			return
-		}
-
+		// パスコードが正しいか検証
 		if !chat_expose.IsValidPasscode(chatID, passcode) {
-			api_err.Send(c, 401, errors.NewError("パスコードが一致しません", tx.Error))
+			api_err.Send(c, 401, errors.NewError("パスコードが一致しません"))
 			return
 		}
 
 		response := Res{}
-
-		backendErr := func() error {
+		err := db.Transaction(func(tx *gorm.DB) error {
 			// チャットを取得
 			apiChatRes, err := chat_expose.FindByID(tx, chatID)
 			if err != nil {
@@ -52,18 +46,15 @@ func GetChatByPasscode(e *gin.Engine, db *gorm.DB) {
 				return errors.NewError("チャットIDでメッセージを取得できません", err)
 			}
 
-			response.Chat = res.ChatResForGuest(apiChatRes)
+			response.Chat = res.CastToChatAPIResForGuest(apiChatRes)
 			response.Messages = res.CastToMessagesAPIRes(msgs)
 
 			return nil
-		}()
-		if backendErr != nil {
-			tx.Rollback()
-			api_err.Send(c, 500, errors.NewError("バックエンドの処理が失敗しました", backendErr))
+		})
+		if err != nil {
+			api_err.Send(c, 500, errors.NewError("Txエラー", err))
 			return
 		}
-
-		tx.Commit()
 
 		c.JSON(200, response)
 	})
