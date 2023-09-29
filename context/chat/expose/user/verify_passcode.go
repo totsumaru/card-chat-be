@@ -3,8 +3,8 @@ package user
 import "github.com/totsumaru/card-chat-be/context/chat/domain"
 
 // パスコードが正しいかを検証します
-func IsVerifyPasscode(id string, passcode string) bool {
-	generatedPass := domain.GeneratePasscodeFromUUID(id)
+func IsValidPasscode(chatID string, passcode string) bool {
+	generatedPass := domain.GeneratePasscodeFromUUID(chatID)
 	if passcode == generatedPass {
 		return true
 	}

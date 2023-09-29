@@ -2,7 +2,7 @@
 
 ホストを設定します。
 
-- ログインしているホストのみ
+- ログインしているユーザーのみが設定できます
 
 ```
 [POST] /api/chat/[chat-id]/start
@@ -15,21 +15,16 @@
 ### Header
 
 - `Authorization`(required)
-- `Passcode`(required)
 
 ```text
 Authorization: Bearer [token]
-Passcode: [passcode]
 ```
 
-### Body
+### Body(Form)
 
-```json
-{
-  "id": "cb273580-8a04-4421-8141-e2bc48a89069",
-  "display_name": "鈴木 太郎"
-}
-```
+| Field Name     | Type   | 
+|----------------|--------|
+| `display_name` | string |
 
 ### Success
 

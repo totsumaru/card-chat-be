@@ -3,6 +3,10 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/chat/chat_id"
+	"github.com/totsumaru/card-chat-be/api/chat/chat_id/email"
+	"github.com/totsumaru/card-chat-be/api/chat/chat_id/passcode"
+	"github.com/totsumaru/card-chat-be/api/chat/chat_id/read"
+	"github.com/totsumaru/card-chat-be/api/chat/chat_id/start"
 	chat_create "github.com/totsumaru/card-chat-be/api/chat/create"
 	host_create "github.com/totsumaru/card-chat-be/api/host/create"
 	"github.com/totsumaru/card-chat-be/api/host/host_id"
@@ -16,6 +20,10 @@ func RegisterRouter(e *gin.Engine, db *gorm.DB) {
 	// `/chat`
 	chat_create.CreateChat(e, db)
 	chat_id.GetChat(e, db)
+	email.UpdateNoticeEmail(e, db)
+	passcode.GetChatByPasscode(e, db)
+	read.ChangeToRead(e, db)
+	start.RegisterHostID(e, db)
 
 	// `/chats`
 
