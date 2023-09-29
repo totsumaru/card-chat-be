@@ -6,7 +6,8 @@ import (
 	"github.com/totsumaru/card-chat-be/api/internal/cookie"
 	"github.com/totsumaru/card-chat-be/api/internal/res"
 	"github.com/totsumaru/card-chat-be/api/internal/session"
-	"github.com/totsumaru/card-chat-be/context/chat/expose/user"
+	chatExpose "github.com/totsumaru/card-chat-be/context/chat/expose/user"
+	messageExpose "github.com/totsumaru/card-chat-be/context/message/expose/user"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
@@ -24,13 +25,12 @@ const (
 
 // レスポンスです
 type Res struct {
-	Chat   res.ChatRes `json:"chat"`
-	Status ChatStatus  `json:"status"`
+	Status   ChatStatus       `json:"status"`
+	Chat     res.ChatRes      `json:"chat"`
+	Messages []res.MessageRes `json:"messages"`
 }
 
-// チャットです
-//
-// 初回は全ての会話を取得し、認証できたらWebsocketでリアルタイム通信を行います。
+// チャットを取得します
 func GetChat(e *gin.Engine, db *gorm.DB) {
 	e.POST("/api/chat/:chatID", func(c *gin.Context) {
 		chatID := c.Param("chatID")
@@ -45,7 +45,7 @@ func GetChat(e *gin.Engine, db *gorm.DB) {
 		}
 
 		// チャットを取得
-		apiChatRes, err := user.FindByID(tx, chatID)
+		apiChatRes, err := chatExpose.FindByID(tx, chatID)
 		if err != nil {
 			api_err.Send(c, 404, errors.NewError("チャットを取得できません", tx.Error))
 			return
@@ -56,14 +56,16 @@ func GetChat(e *gin.Engine, db *gorm.DB) {
 			// チャットが開始されていない場合
 			if isLogin {
 				c.JSON(200, Res{
-					Status: statusFirstIsLogin,
-					Chat:   res.ChatRes{},
+					Status:   statusFirstIsLogin,
+					Chat:     res.ChatRes{},
+					Messages: make([]res.MessageRes, 0),
 				})
 				return
 			} else {
 				c.JSON(200, Res{
-					Status: statusFirstNotLogin,
-					Chat:   res.ChatRes{},
+					Status:   statusFirstNotLogin,
+					Chat:     res.ChatRes{},
+					Messages: make([]res.MessageRes, 0),
 				})
 				return
 			}
@@ -72,29 +74,42 @@ func GetChat(e *gin.Engine, db *gorm.DB) {
 
 			// 自分がホストの場合
 			if apiChatRes.HostID == verifyRes.HostID {
+				// 全てのメッセージを取得します
+				msgs, err := messageExpose.FindByChatID(tx, apiChatRes.ID)
+				if err != nil {
+					api_err.Send(c, 500, errors.NewError("チャットIDでメッセージを取得できません", tx.Error))
+					return
+				}
+
 				c.JSON(200, Res{
-					Status: statusHost,
-					Chat:   res.ChatResForHost(apiChatRes),
+					Status:   statusHost,
+					Chat:     res.ChatResForHost(apiChatRes),
+					Messages: res.CastToAPIMessagesRes(msgs),
 				})
-
-				// TODO: Websocket通信を開始します
-
 				return
 			} else {
 				// 自分がホストではない(ゲストorビジター)場合
+				// 全てのメッセージを取得します
+				msgs, err := messageExpose.FindByChatID(tx, apiChatRes.ID)
+				if err != nil {
+					api_err.Send(c, 500, errors.NewError("チャットIDでメッセージを取得できません", tx.Error))
+					return
+				}
 
 				// cookieのパスコードとチャットのパスコードが一致する場合
 				cookiePasscode, err := c.Cookie(cookie.PassKey(apiChatRes.ID))
 				if err == nil && cookiePasscode == apiChatRes.Passcode {
 					c.JSON(200, Res{
-						Status: statusGuest,
-						Chat:   res.ChatResForGuest(apiChatRes),
+						Status:   statusGuest,
+						Chat:     res.ChatResForGuest(apiChatRes),
+						Messages: res.CastToAPIMessagesRes(msgs),
 					})
 					return
 				} else {
 					c.JSON(200, Res{
-						Status: statusVisitor,
-						Chat:   res.ChatRes{},
+						Status:   statusVisitor,
+						Chat:     res.ChatRes{},
+						Messages: make([]res.MessageRes, 0),
 					})
 					return
 				}
