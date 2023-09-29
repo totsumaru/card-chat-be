@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
 	shared_api "github.com/totsumaru/card-chat-be/api/internal/res"
-	"github.com/totsumaru/card-chat-be/context/host/expose/user"
+	host_expose "github.com/totsumaru/card-chat-be/context/host/expose/user"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
@@ -28,28 +28,19 @@ func GetHost(e *gin.Engine, db *gorm.DB) {
 		res := Res{}
 
 		// ホストを取得します
-		err := func() error {
-			apiRes, err := user.FindByID(tx, hostID)
+		backendErr := func() error {
+			backendHost, err := host_expose.FindByID(tx, hostID)
 			if err != nil {
 				return errors.NewError("ホストが取得できません", err)
 			}
 
-			res.Host.ID = apiRes.ID
-			res.Host.Name = apiRes.Name
-			res.Host.AvatarURL = apiRes.AvatarURL
-			res.Host.Headline = apiRes.Headline
-			res.Host.Introduction = apiRes.Introduction
-			res.Host.Company.Name = apiRes.Company.Name
-			res.Host.Company.Position = apiRes.Company.Position
-			res.Host.Company.Tel = apiRes.Company.Tel
-			res.Host.Company.Email = apiRes.Company.Email
-			res.Host.Company.Website = apiRes.Company.Website
+			res.Host = shared_api.CastToAPIHostRes(backendHost)
 
 			return nil
 		}()
-		if err != nil {
+		if backendErr != nil {
 			tx.Rollback()
-			api_err.Send(c, 500, errors.NewError("バックエンドの処理が失敗しました", err))
+			api_err.Send(c, 500, errors.NewError("バックエンドの処理が失敗しました", backendErr))
 			return
 		}
 

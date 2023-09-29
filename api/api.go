@@ -8,6 +8,7 @@ import (
 	"github.com/totsumaru/card-chat-be/api/chat/chat_id/read"
 	"github.com/totsumaru/card-chat-be/api/chat/chat_id/start"
 	chat_create "github.com/totsumaru/card-chat-be/api/chat/create"
+	"github.com/totsumaru/card-chat-be/api/chats"
 	host_create "github.com/totsumaru/card-chat-be/api/host/create"
 	"github.com/totsumaru/card-chat-be/api/host/host_id"
 	host_edit "github.com/totsumaru/card-chat-be/api/host/host_id/edit"
@@ -26,6 +27,7 @@ func RegisterRouter(e *gin.Engine, db *gorm.DB) {
 	start.RegisterHostID(e, db)
 
 	// `/chats`
+	chats.FindChats(e, db)
 
 	// `/host`
 	host_id.GetHost(e, db)
