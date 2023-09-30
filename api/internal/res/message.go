@@ -16,6 +16,17 @@ type MessageAPIRes struct {
 }
 
 // バックエンドのレスポンスをAPIのレスポンスに変換します
+func CastToMessageAPIRes(backendResMessage message_expose.Res) MessageAPIRes {
+	return MessageAPIRes{
+		ID:      backendResMessage.ID,
+		ChatID:  backendResMessage.ChatID,
+		FromID:  backendResMessage.FromID,
+		Content: backendResMessage.Content,
+		Created: backendResMessage.Created,
+	}
+}
+
+// 複数のバックエンドのレスポンスをAPIのレスポンスに変換します
 func CastToMessagesAPIRes(backendResMessages []message_expose.Res) []MessageAPIRes {
 	res := make([]MessageAPIRes, 0)
 
