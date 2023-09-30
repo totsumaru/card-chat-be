@@ -10,6 +10,8 @@ import (
 )
 
 // ゲストの情報を編集します
+//
+// ホストのみが実行できます。
 func UpdateGuestInfo(e *gin.Engine, db *gorm.DB) {
 	e.POST("/api/chat/:chatID/edit", func(c *gin.Context) {
 		chatID := c.Param("chatID")
@@ -18,23 +20,25 @@ func UpdateGuestInfo(e *gin.Engine, db *gorm.DB) {
 		memo := c.PostForm("memo")
 
 		// 認証
-		ok, verifyRes := verify.VerifyToken(c)
-		if !ok {
+		isLogin, verifyRes := verify.VerifyToken(c)
+		if !isLogin {
 			api_err.Send(c, 401, errors.NewError("認証できません"))
 			return
 		}
 
-		err := db.Transaction(func(tx *gorm.DB) error {
-			// ホストかどうかを確認
-			chatRes, err := chat_expose.FindByID(tx, chatID)
-			if err != nil {
-				return errors.NewError("IDでチャットを取得できません", err)
-			}
+		// ホストかどうかを確認します
+		isHost, err := verify.IsHost(db, chatID, verifyRes.HostID)
+		if err != nil {
+			api_err.Send(c, 500, errors.NewError("ホストの確認ができません"))
+			return
+		}
+		if !isHost {
+			api_err.Send(c, 401, errors.NewError("ホストではありません"))
+			return
+		}
 
-			if chatRes.HostID != verifyRes.HostID {
-				return errors.NewError("ホストではありません")
-			}
-
+		// Tx
+		err = db.Transaction(func(tx *gorm.DB) error {
 			_, err = chat_expose.UpdateGuestInfo(tx, chatID, displayName, memo)
 			if err != nil {
 				return errors.NewError("ゲストの情報を更新できません", err)

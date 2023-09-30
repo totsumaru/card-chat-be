@@ -21,34 +21,42 @@ func SendMessage(e *gin.Engine, db *gorm.DB) {
 
 		content := c.PostForm("content")
 
-		fromID := ""
+		var fromID string
 
-		err := db.Transaction(func(tx *gorm.DB) error {
-			// 認証
-			isLogin, verifyRes := verify.VerifyToken(c)
-			if isLogin {
-				// ホストかどうかを確認
-				chatRes, err := chat_expose.FindByID(tx, chatID)
-				if err != nil {
-					return errors.NewError("IDでチャットを取得できません", err)
-				}
-				if chatRes.HostID != verifyRes.HostID {
-					return errors.NewError("ホストではありません", err)
-				}
-				// 自分がホストの場合はfromIDにホストIDを入れます
-				fromID = verifyRes.HostID
-			} else {
-				// パスコードが正しいかを確認します
-				if !chat_expose.IsValidPasscode(chatID, passcode) {
-					return errors.NewError("パスコードが一致しません")
-				}
-				// チャットIDをfromIDに設定します
-				fromID = chatID
+		// 認証をします
+		isLogin, verifyRes := verify.VerifyToken(c)
+
+		// パスコードが正しい場合は、fromIDにチャットIDを設定します
+		if chat_expose.IsValidPasscode(chatID, passcode) {
+			fromID = chatID
+		} else if isLogin {
+			// ホストの場合は、fromIDにホストIDを設定します
+			isHost, err := verify.IsHost(db, chatID, verifyRes.HostID)
+			if err != nil {
+				api_err.Send(c, 500, errors.NewError("ホストの確認ができません", err))
+				return
 			}
+			if isHost {
+				fromID = verifyRes.HostID
+			}
+		}
 
+		if fromID == "" {
+			api_err.Send(c, 401, errors.NewError("送信者が不明です"))
+			return
+		}
+
+		// Tx
+		err := db.Transaction(func(tx *gorm.DB) error {
 			_, err := message_expose.CreateMessage(tx, chatID, fromID, content)
 			if err != nil {
 				return errors.NewError("メッセージを作成できません", err)
+			}
+
+			// 未読処理を行います
+			_, err = chat_expose.UpdateIsRead(tx, chatID, false)
+			if err != nil {
+				return errors.NewError("未読処理に失敗しました", err)
 			}
 
 			return nil

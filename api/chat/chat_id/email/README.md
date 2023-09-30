@@ -16,11 +16,9 @@ Headerのパスコードで認証します。
 
 ### Header
 
-- `Authorization`(required)
 - `Passcode`(required)
 
 ```text
-Authorization: Bearer [token]
 Passcode: [passcode]
 ```
 

@@ -13,11 +13,12 @@ import (
 func RegisterHostID(e *gin.Engine, db *gorm.DB) {
 	e.POST("/api/chat/:chatID/start", func(c *gin.Context) {
 		chatID := c.Param("chatID")
+
 		displayName := c.PostForm("display_name")
 
 		// 認証
-		ok, res := verify.VerifyToken(c)
-		if !ok {
+		isLogin, res := verify.VerifyToken(c)
+		if !isLogin {
 			api_err.Send(c, 401, errors.NewError("認証できません"))
 			return
 		}

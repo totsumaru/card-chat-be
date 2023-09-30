@@ -15,23 +15,20 @@ func ChangeToRead(e *gin.Engine, db *gorm.DB) {
 		chatID := c.Param("chatID")
 
 		// 認証
-		ok, res := verify.VerifyToken(c)
-		if !ok {
+		isLogin, verifyRes := verify.VerifyToken(c)
+		if !isLogin {
 			api_err.Send(c, 401, errors.NewError("認証できません"))
 			return
 		}
 
-		err := db.Transaction(func(tx *gorm.DB) error {
-			// ホストかどうかを確認
-			chatRes, err := chat_expose.FindByID(tx, chatID)
-			if err != nil {
-				return errors.NewError("IDでチャットを取得できません", err)
-			}
+		// ホストかどうか検証します
+		isHost, err := verify.IsHost(db, chatID, verifyRes.HostID)
+		if err != nil || !isHost {
+			api_err.Send(c, 401, errors.NewError("ホストを認証できません", err))
+			return
+		}
 
-			if chatRes.HostID != res.HostID {
-				return errors.NewError("ホストではありません")
-			}
-
+		err = db.Transaction(func(tx *gorm.DB) error {
 			_, err = chat_expose.UpdateIsRead(tx, chatID, true)
 			if err != nil {
 				return errors.NewError("既読処理に失敗しました", err)

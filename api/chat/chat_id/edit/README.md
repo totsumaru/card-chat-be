@@ -37,7 +37,7 @@ Authorization: Bearer [token]
 
 ### Error
 
-- code: `401` | `404` | `500`
+- code: `401` | `500`
 
 ```json
 {

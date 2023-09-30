@@ -34,6 +34,7 @@ type Res struct {
 func GetChat(e *gin.Engine, db *gorm.DB) {
 	e.POST("/api/chat/:chatID", func(c *gin.Context) {
 		chatID := c.Param("chatID")
+		headerPasscode := c.GetHeader("Passcode")
 
 		// 認証
 		isLogin, verifyRes := verify.VerifyToken(c)
@@ -41,7 +42,7 @@ func GetChat(e *gin.Engine, db *gorm.DB) {
 		// チャットを取得
 		apiChatRes, err := chat_expose.FindByID(db, chatID)
 		if err != nil {
-			api_err.Send(c, 404, errors.NewError("チャットを取得できません", err))
+			api_err.Send(c, 500, errors.NewError("チャットを取得できません", err))
 			return
 		}
 
@@ -90,9 +91,10 @@ func GetChat(e *gin.Engine, db *gorm.DB) {
 					return
 				}
 
-				// cookieのパスコードとチャットのパスコードが一致する場合
+				// cookie or header のパスコードと、チャットのパスコードが一致する場合
 				cookiePasscode, err := c.Cookie(cookie.PassKey(apiChatRes.ID))
-				if err == nil && cookiePasscode == apiChatRes.Passcode {
+				if err == nil && (cookiePasscode == apiChatRes.Passcode ||
+					headerPasscode == apiChatRes.Passcode) {
 					c.JSON(200, Res{
 						Status:   statusGuest,
 						Chat:     res.CastToChatAPIResForGuest(apiChatRes),

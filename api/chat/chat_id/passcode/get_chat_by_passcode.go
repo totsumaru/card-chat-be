@@ -29,9 +29,9 @@ func GetChatByPasscode(e *gin.Engine, db *gorm.DB) {
 		}
 
 		response := Res{}
-		err := db.Transaction(func(tx *gorm.DB) error {
+		err := func() error {
 			// チャットを取得
-			apiChatRes, err := chat_expose.FindByID(tx, chatID)
+			apiChatRes, err := chat_expose.FindByID(db, chatID)
 			if err != nil {
 				return errors.NewError("IDでチャットを取得できません", err)
 			}
@@ -41,7 +41,7 @@ func GetChatByPasscode(e *gin.Engine, db *gorm.DB) {
 			}
 
 			// 全てのメッセージを取得します
-			msgs, err := message_expose.FindByChatID(tx, apiChatRes.ID)
+			msgs, err := message_expose.FindByChatID(db, apiChatRes.ID)
 			if err != nil {
 				return errors.NewError("チャットIDでメッセージを取得できません", err)
 			}
@@ -50,7 +50,7 @@ func GetChatByPasscode(e *gin.Engine, db *gorm.DB) {
 			response.Messages = res.CastToMessagesAPIRes(msgs)
 
 			return nil
-		})
+		}()
 		if err != nil {
 			api_err.Send(c, 500, errors.NewError("Txエラー", err))
 			return

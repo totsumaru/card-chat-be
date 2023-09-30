@@ -13,6 +13,7 @@ func UpdateNoticeEmail(e *gin.Engine, db *gorm.DB) {
 	e.POST("/api/chat/:chatID/email", func(c *gin.Context) {
 		chatID := c.Param("chatID")
 		passcode := c.GetHeader("Passcode")
+
 		email := c.PostForm("email")
 
 		// パスコードが一致するかどうかを確認
@@ -21,6 +22,7 @@ func UpdateNoticeEmail(e *gin.Engine, db *gorm.DB) {
 			return
 		}
 
+		// Tx
 		err := db.Transaction(func(tx *gorm.DB) error {
 			_, err := chat_expose.UpdateEmail(tx, chatID, email)
 			if err != nil {
