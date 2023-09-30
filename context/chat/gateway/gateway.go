@@ -11,8 +11,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// TODO: レコードが取得できない場合のレスポンス
-
 type Gateway struct {
 	tx *gorm.DB
 }
