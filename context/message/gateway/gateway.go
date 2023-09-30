@@ -43,14 +43,13 @@ func (g Gateway) Create(m domain.Message) error {
 }
 
 // IDでメッセージを取得します
+//
+// レコードが存在しない場合はエラーを返します。
 func (g Gateway) FindByID(id id.UUID) (domain.Message, error) {
 	res := domain.Message{}
 
 	var dbMessage database.MessageSchema
 	if err := g.tx.First(&dbMessage, "id = ?", id.String()).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return res, errors.NewError("レコードが見つかりません")
-		}
 		return res, errors.NewError("IDでチャットを取得できません", err)
 	}
 
@@ -65,15 +64,21 @@ func (g Gateway) FindByID(id id.UUID) (domain.Message, error) {
 
 // チャットIDでメッセージを取得します
 //
+// 取得できない場合は空の値を返し、エラーは発生しません。
+//
 // createの降順(最新のメッセージが先頭)で取得します。
 func (g Gateway) FindByChatID(chatID id.UUID) ([]domain.Message, error) {
-	var dbMessages []database.MessageSchema
+	dbMessages := make([]database.MessageSchema, 0)
 
 	// Orderメソッドを使ってcreatedの降順でソート
 	if err := g.tx.Where(
 		"chat_id = ?",
 		chatID.String(),
 	).Order("created desc").Find(&dbMessages).Error; err != nil {
+		// レコードが存在しない場合、空のスライスを返します
+		if err == gorm.ErrRecordNotFound {
+			return []domain.Message{}, nil
+		}
 		return nil, errors.NewError("取得できません", err)
 	}
 
@@ -90,8 +95,10 @@ func (g Gateway) FindByChatID(chatID id.UUID) ([]domain.Message, error) {
 }
 
 // チャットIDの最新のメッセージを取得します
+//
+// 取得できない場合は空の値を返し、エラーは発生しません。
 func (g Gateway) FindLatestByChatID(chatID id.UUID) (domain.Message, error) {
-	res := domain.Message{}
+	empty := domain.Message{}
 	var dbMessage database.MessageSchema
 
 	// Orderメソッドを使ってcreatedの降順でソートし、Firstメソッドで最新のメッセージを取得
@@ -101,15 +108,15 @@ func (g Gateway) FindLatestByChatID(chatID id.UUID) (domain.Message, error) {
 	).Order("created desc").First(&dbMessage).Error; err != nil {
 		// レコードが見つからない場合は空のメッセージを返す
 		if err == gorm.ErrRecordNotFound {
-			return res, nil
+			return empty, nil
 		}
-		return res, errors.NewError("取得できません", err)
+		return empty, errors.NewError("取得できません", err)
 	}
 
 	// DBのスキーマをドメインモデルに変換
 	domainMessage, err := castToDomainModelMessage(dbMessage)
 	if err != nil {
-		return res, errors.NewError("DBをドメインモデルに変換できません", err)
+		return empty, errors.NewError("DBをドメインモデルに変換できません", err)
 	}
 
 	return domainMessage, nil
@@ -128,31 +135,31 @@ func castToDBMessage(m domain.Message) database.MessageSchema {
 
 // DBのメッセージからドメインモデルに変換します
 func castToDomainModelMessage(dbMessage database.MessageSchema) (domain.Message, error) {
-	res := domain.Message{}
+	empty := domain.Message{}
 
 	mID, err := id.RestoreUUID(dbMessage.ID)
 	if err != nil {
-		return res, errors.NewError("IDを復元できません", err)
+		return empty, errors.NewError("IDを復元できません", err)
 	}
 
 	chatID, err := id.RestoreUUID(dbMessage.ChatID)
 	if err != nil {
-		return res, errors.NewError("チャットIDを復元できません", err)
+		return empty, errors.NewError("チャットIDを復元できません", err)
 	}
 
 	fromID, err := id.RestoreUUID(dbMessage.FromID)
 	if err != nil {
-		return res, errors.NewError("送信者のIDを復元できません", err)
+		return empty, errors.NewError("送信者のIDを復元できません", err)
 	}
 
 	content, err := domain.NewContent(dbMessage.Content)
 	if err != nil {
-		return res, errors.NewError("内容を作成できません", err)
+		return empty, errors.NewError("内容を作成できません", err)
 	}
 
 	m, err := domain.RestoreMessage(mID, chatID, fromID, content, dbMessage.Created)
 	if err != nil {
-		return res, errors.NewError("メッセージを作成できません", err)
+		return empty, errors.NewError("メッセージを作成できません", err)
 	}
 
 	return m, nil

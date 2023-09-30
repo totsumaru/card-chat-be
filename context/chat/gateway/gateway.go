@@ -11,6 +11,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// TODO: レコードが取得できない場合のレスポンス
+
 type Gateway struct {
 	tx *gorm.DB
 }
@@ -69,14 +71,13 @@ func (g Gateway) Update(c domain.Chat) error {
 }
 
 // IDでチャットを取得します
+//
+// レコードが存在していない場合はエラーを返します。
 func (g Gateway) FindByID(id id.UUID) (domain.Chat, error) {
 	res := domain.Chat{}
 
-	var dbChat database.ChatSchema
+	dbChat := database.ChatSchema{}
 	if err := g.tx.First(&dbChat, "id = ?", id.String()).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return res, errors.NewError("レコードが見つかりません")
-		}
 		return res, errors.NewError("IDでチャットを取得できません", err)
 	}
 
@@ -90,14 +91,15 @@ func (g Gateway) FindByID(id id.UUID) (domain.Chat, error) {
 }
 
 // 指定されたIDのチャットを取得し、そのチャットに対する排他ロックを取得します。
+//
+// レコードが存在しない場合はエラーを返します。
 func (g Gateway) FindByIDForUpdate(id id.UUID) (domain.Chat, error) {
 	res := domain.Chat{}
 
-	var dbChat database.ChatSchema
-	if err := g.tx.Set("gorm:query_option", "FOR UPDATE").First(&dbChat, "id = ?", id.String()).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return res, errors.NewError("レコードが見つかりません")
-		}
+	dbChat := database.ChatSchema{}
+	if err := g.tx.Set("gorm:query_option", "FOR UPDATE").First(
+		&dbChat, "id = ?", id.String(),
+	).Error; err != nil {
 		return res, errors.NewError("IDでチャットを取得できません", err)
 	}
 
@@ -111,6 +113,8 @@ func (g Gateway) FindByIDForUpdate(id id.UUID) (domain.Chat, error) {
 }
 
 // ホストIDに一致するチャットを全て取得します
+//
+// 取得できない場合は空の値を返し、エラーは発生しません。
 //
 // 取得する順番
 //  1. IsRead=false(未読): メッセージが最近のものから降順
@@ -127,7 +131,12 @@ func (g Gateway) FindByHostID(hostID id.UUID) ([]domain.Chat, error) {
 		LastMessage DESC
 	`)
 
+	// レコードの取得
 	if err := query.Find(&dbChats).Error; err != nil {
+		// レコードが存在しない場合、空のスライスを返します
+		if err == gorm.ErrRecordNotFound {
+			return []domain.Chat{}, nil
+		}
 		return nil, errors.NewError("取得できません", err)
 	}
 

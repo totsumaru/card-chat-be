@@ -71,14 +71,13 @@ func (g Gateway) Update(u domain.Host) error {
 }
 
 // IDでホストを取得します
+//
+// レコードが存在しない場合はエラーを返します。
 func (g Gateway) FindByID(id id.UUID) (domain.Host, error) {
 	res := domain.Host{}
 
 	var dbHost database.HostSchema
 	if err := g.tx.First(&dbHost, "id = ?", id.String()).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return res, errors.NewError("レコードが見つかりません")
-		}
 		return res, errors.NewError("IDでチャットを取得できません", err)
 	}
 
@@ -92,14 +91,15 @@ func (g Gateway) FindByID(id id.UUID) (domain.Host, error) {
 }
 
 // FOR UPDATEでホストを取得します
+//
+// レコードが存在しない場合はエラーを返します。
 func (g Gateway) FindByIDForUpdate(id id.UUID) (domain.Host, error) {
 	res := domain.Host{}
 
 	var dbHost database.HostSchema
-	if err := g.tx.Set("gorm:query_option", "FOR UPDATE").First(&dbHost, "id = ?", id.String()).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return res, errors.NewError("レコードが見つかりません")
-		}
+	if err := g.tx.Set("gorm:query_option", "FOR UPDATE").First(
+		&dbHost, "id = ?", id.String(),
+	).Error; err != nil {
 		return res, errors.NewError("IDでチャットを取得できません", err)
 	}
 
