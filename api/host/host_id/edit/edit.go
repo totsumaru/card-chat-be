@@ -17,8 +17,8 @@ func EditHostProfile(e *gin.Engine, db *gorm.DB) {
 		hostID := c.Param("hostID")
 
 		// 認証
-		ok, res := verify.VerifyToken(c)
-		if !ok || hostID != res.HostID {
+		isLogin, res := verify.VerifyToken(c)
+		if !isLogin || hostID != res.HostID {
 			api_err.Send(c, 401, errors.NewError("認証できません"))
 			return
 		}

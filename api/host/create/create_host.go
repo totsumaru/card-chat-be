@@ -13,8 +13,8 @@ import (
 func CreateHost(e *gin.Engine, db *gorm.DB) {
 	e.POST("/api/host/create", func(c *gin.Context) {
 		// 認証
-		ok, verifyRes := verify.VerifyToken(c)
-		if !ok {
+		isLogin, verifyRes := verify.VerifyToken(c)
+		if !isLogin {
 			api_err.Send(c, 401, errors.NewError("認証できません"))
 			return
 		}
