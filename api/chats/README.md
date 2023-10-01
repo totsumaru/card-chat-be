@@ -41,7 +41,7 @@ Authorization: Bearer [token]
         "is_closed": false,
         "last_message": "2023-09-29T10:30:00Z"
       },
-      "latest_message": {
+      "last_message": {
         "id": "123e4567-e89b-12d3-a456-426614174001",
         "chat_id": "123e4567-e89b-12d3-a456-426614174002",
         "from_id": "123e4567-e89b-12d3-a456-426614174003",

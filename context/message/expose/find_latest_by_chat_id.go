@@ -8,7 +8,7 @@ import (
 )
 
 // チャットIDの最新のメッセージを取得します
-func FindLatestByChatID(tx *gorm.DB, chatID string) (Res, error) {
+func FindLastByChatID(tx *gorm.DB, chatID string) (Res, error) {
 	empty := Res{}
 
 	cID, err := id.RestoreUUID(chatID)
@@ -21,7 +21,7 @@ func FindLatestByChatID(tx *gorm.DB, chatID string) (Res, error) {
 		return empty, errors.NewError("Gatewayを作成できません", err)
 	}
 
-	msg, err := gw.FindLatestByChatID(cID)
+	msg, err := gw.FindLastByChatID(cID)
 	if err != nil {
 		return empty, errors.NewError("チャットIDで最新のメッセージを取得できません", err)
 	}

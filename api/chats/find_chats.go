@@ -20,8 +20,8 @@ type Res struct {
 
 // チャットのレスポンスです
 type ChatRes struct {
-	Chat          shared_api.ChatAPIRes    `json:"chat"`
-	LatestMessage shared_api.MessageAPIRes `json:"latest_message"`
+	Chat        shared_api.ChatAPIRes    `json:"chat"`
+	LastMessage shared_api.MessageAPIRes `json:"last_message"`
 }
 
 // 自分がホストの全てのチャットを取得します
@@ -54,7 +54,7 @@ func FindChats(e *gin.Engine, db *gorm.DB) {
 			// チャットID: メッセージ のmapを作成します。
 			messages := map[string]message_expose.Res{}
 			for _, chat := range allChats {
-				messageRes, err := message_expose.FindLatestByChatID(db, chat.ID)
+				messageRes, err := message_expose.FindLastByChatID(db, chat.ID)
 				if err != nil {
 					return errors.NewError("最新のチャットを取得できません", err)
 				}
@@ -66,8 +66,8 @@ func FindChats(e *gin.Engine, db *gorm.DB) {
 			chatsRes := make([]ChatRes, 0)
 			for _, chat := range allChats {
 				r := ChatRes{
-					Chat:          shared_api.CastToChatAPIResForHost(chat),
-					LatestMessage: shared_api.CastToMessageAPIRes(messages[chat.ID]),
+					Chat:        shared_api.CastToChatAPIResForHost(chat),
+					LastMessage: shared_api.CastToMessageAPIRes(messages[chat.ID]),
 				}
 				chatsRes = append(chatsRes, r)
 			}

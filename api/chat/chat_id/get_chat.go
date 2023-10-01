@@ -49,12 +49,20 @@ func GetChat(e *gin.Engine, db *gorm.DB) {
 
 		// チャットが開始されているかを確認
 		if apiChatRes.HostID == "" {
+			// ホスト(現在ログイン中のユーザー)を取得します
+			host, err := host_expose.FindByID(db, verifyRes.HostID)
+			if err != nil {
+				api_err.Send(c, 500, errors.NewError("ホストを取得できません", err))
+				return
+			}
+
 			// チャットが開始されていない場合
 			if isLogin {
 				c.JSON(200, Res{
 					Status:   statusFirstIsLogin,
 					Chat:     res.ChatAPIRes{},
 					Messages: make([]res.MessageAPIRes, 0),
+					Host:     res.CastToHostAPIRes(host),
 				})
 				return
 			} else {
@@ -62,6 +70,7 @@ func GetChat(e *gin.Engine, db *gorm.DB) {
 					Status:   statusFirstNotLogin,
 					Chat:     res.ChatAPIRes{},
 					Messages: make([]res.MessageAPIRes, 0),
+					Host:     res.HostAPIRes{},
 				})
 				return
 			}

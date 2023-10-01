@@ -97,7 +97,7 @@ func (g Gateway) FindByChatID(chatID id.UUID) ([]domain.Message, error) {
 // チャットIDの最新のメッセージを取得します
 //
 // 取得できない場合は空の値を返し、エラーは発生しません。
-func (g Gateway) FindLatestByChatID(chatID id.UUID) (domain.Message, error) {
+func (g Gateway) FindLastByChatID(chatID id.UUID) (domain.Message, error) {
 	empty := domain.Message{}
 	var dbMessage database.MessageSchema
 
