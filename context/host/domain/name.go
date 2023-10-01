@@ -30,10 +30,6 @@ func (n Name) String() string {
 
 // 検証します
 func (n Name) validate() error {
-	if n.value == "" {
-		return errors.NewError("値が空です")
-	}
-
 	if len(n.value) > NameMaxLen {
 		return errors.NewError("文字数を超過しています")
 	}

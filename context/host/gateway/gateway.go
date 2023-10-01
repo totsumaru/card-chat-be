@@ -126,6 +126,8 @@ func castToDBHost(u domain.Host) database.HostSchema {
 		Tel:           u.Company().Tel().String(),
 		Email:         u.Company().Email().String(),
 		Website:       u.Company().Website().String(),
+		Created:       u.Created(),
+		Updated:       u.Updated(),
 	}
 }
 
@@ -144,7 +146,7 @@ func castToDomainModel(dbHost database.HostSchema) (domain.Host, error) {
 	}
 
 	// アバター
-	imageID, err := id.RestoreUUID(dbHost.AvatarImageID)
+	imageID, err := id.RestoreAllowEmptyUUID(dbHost.AvatarImageID)
 	if err != nil {
 		return res, errors.NewError("画像IDを作成できません", err)
 	}

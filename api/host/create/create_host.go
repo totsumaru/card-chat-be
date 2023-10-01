@@ -1,6 +1,8 @@
 package create
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
 	"github.com/totsumaru/card-chat-be/api/internal/verify"
@@ -20,10 +22,12 @@ func CreateHost(e *gin.Engine, db *gorm.DB) {
 		}
 
 		err := db.Transaction(func(tx *gorm.DB) error {
-			_, err := host_expose.CreateHost(tx, verifyRes.HostID)
+			host, err := host_expose.CreateHost(tx, verifyRes.HostID)
 			if err != nil {
 				return errors.NewError("ホストを作成できません", err)
 			}
+
+			fmt.Println(host)
 
 			return nil
 		})
@@ -32,6 +36,6 @@ func CreateHost(e *gin.Engine, db *gorm.DB) {
 			return
 		}
 
-		c.JSON(200, "")
+		c.JSON(200, nil)
 	})
 }

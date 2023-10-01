@@ -30,7 +30,13 @@ func (u URL) String() string {
 }
 
 // 検証します
+//
+// 空を許容します。
 func (u URL) validate() error {
+	if u.value == "" {
+		return nil
+	}
+
 	_, err := url.ParseRequestURI(u.value)
 	if err != nil {
 		return errors.NewError("URLが不正です")

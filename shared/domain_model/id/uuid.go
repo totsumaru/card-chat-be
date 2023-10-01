@@ -37,6 +37,15 @@ func RestoreUUID(id string) (UUID, error) {
 	return res, nil
 }
 
+// 空を許容するIDを復元します
+func RestoreAllowEmptyUUID(id string) (UUID, error) {
+	res := UUID{
+		value: id,
+	}
+
+	return res, nil
+}
+
 // IDを取得します
 func (i UUID) String() string {
 	return i.value

@@ -55,6 +55,6 @@ func EditHostProfile(e *gin.Engine, db *gorm.DB) {
 			return
 		}
 
-		c.JSON(200, "")
+		c.JSON(200, nil)
 	})
 }
