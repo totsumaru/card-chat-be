@@ -22,12 +22,7 @@ Authorization: Bearer [token]
 
 ### Body
 
-```json
-{
-  "chat_id": "cb273580-8a04-4421-8141-e2bc48a89069",
-  "passcode": "123456"
-}
-```
+なし
 
 ### Success
 

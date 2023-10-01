@@ -22,12 +22,6 @@
 Authorization: Bearer [token]
 ```
 
-- `Passcode`(ゲストでチャット取得済みの場合のみ)
-
-```text
-Passcode: [passcode]
-```
-
 ### Success
 
 - code: `200`
@@ -38,8 +32,8 @@ Passcode: [passcode]
     - チャットが開始している:
         - ホスト: `host`
         - ホストでは無い:
-            - cookieまたはheaderのパスコードが一致: `guest`
-            - cookieまたはheaderのパスコードが一致しない: `visitor`
+            - cookieのパスコードが一致: `guest`
+            - cookieのパスコードが一致しない: `visitor`
 - ゲストの場合のみパスコードを返します
     - ※通知用Emailの設定のために返します
 

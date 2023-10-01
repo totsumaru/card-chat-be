@@ -14,16 +14,16 @@
 
 ### Header
 
-- `Content-Type`
-
-```text
-Content-Type: multipart/form-data[README.md](..%2F..%2Fcreate%2FREADME.md)
-```
-
 - `Authorization`(required)
 
 ```text
 Authorization: Bearer [token]
+```
+
+- `Content-Type`
+
+```text
+Content-Type: multipart/form-data
 ```
 
 ### Body(Form)

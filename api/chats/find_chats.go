@@ -6,6 +6,7 @@ import (
 	shared_api "github.com/totsumaru/card-chat-be/api/internal/res"
 	"github.com/totsumaru/card-chat-be/api/internal/verify"
 	chat_expose "github.com/totsumaru/card-chat-be/context/chat/expose"
+	host_expose "github.com/totsumaru/card-chat-be/context/host/expose"
 	message_expose "github.com/totsumaru/card-chat-be/context/message/expose"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
@@ -13,7 +14,8 @@ import (
 
 // レスポンスです
 type Res struct {
-	Chats []ChatRes `json:"chats"`
+	Host  shared_api.HostAPIRes `json:"host"`
+	Chats []ChatRes             `json:"chats"`
 }
 
 // チャットのレスポンスです
@@ -41,6 +43,12 @@ func FindChats(e *gin.Engine, db *gorm.DB) {
 				return errors.NewError("ホストIDに一致するチャットを取得できません", err)
 			}
 
+			// ホストを取得します
+			host, err := host_expose.FindByID(db, verifyRes.HostID)
+			if err != nil {
+				return errors.NewError("ホストを取得できません", err)
+			}
+
 			// TODO: N+1問題が発生しているため、今後修正
 			// 全てのチャットの、それぞれの最新メッセージを取得し、
 			// チャットID: メッセージ のmapを作成します。
@@ -65,6 +73,7 @@ func FindChats(e *gin.Engine, db *gorm.DB) {
 			}
 
 			res.Chats = chatsRes
+			res.Host = shared_api.CastToHostAPIRes(host)
 
 			return nil
 		}()

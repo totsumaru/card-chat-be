@@ -20,6 +20,12 @@
 Authorization: Bearer [token]
 ```
 
+- `Content-Type`
+
+```text
+Content-Type: application/x-www-form-urlencoded
+```
+
 ### Body(Form)
 
 | Field Name     | Type   | 

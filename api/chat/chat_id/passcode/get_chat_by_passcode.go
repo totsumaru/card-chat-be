@@ -5,6 +5,7 @@ import (
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
 	"github.com/totsumaru/card-chat-be/api/internal/res"
 	chat_expose "github.com/totsumaru/card-chat-be/context/chat/expose"
+	host_expose "github.com/totsumaru/card-chat-be/context/host/expose"
 	message_expose "github.com/totsumaru/card-chat-be/context/message/expose"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
@@ -14,6 +15,7 @@ import (
 type Res struct {
 	Chat     res.ChatAPIRes      `json:"chat"`
 	Messages []res.MessageAPIRes `json:"messages"`
+	Host     res.HostAPIRes      `json:"host"`
 }
 
 // チャットを取得します
@@ -46,8 +48,15 @@ func GetChatByPasscode(e *gin.Engine, db *gorm.DB) {
 				return errors.NewError("チャットIDでメッセージを取得できません", err)
 			}
 
+			// ホストを取得します
+			host, err := host_expose.FindByID(db, apiChatRes.HostID)
+			if err != nil {
+				return errors.NewError("ホストを取得できません", err)
+			}
+
 			response.Chat = res.CastToChatAPIResForGuest(apiChatRes)
 			response.Messages = res.CastToMessagesAPIRes(msgs)
+			response.Host = res.CastToHostAPIRes(host)
 
 			return nil
 		}()

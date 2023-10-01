@@ -78,7 +78,7 @@ func (g Gateway) FindByID(id id.UUID) (domain.Host, error) {
 
 	var dbHost database.HostSchema
 	if err := g.tx.First(&dbHost, "id = ?", id.String()).Error; err != nil {
-		return res, errors.NewError("IDでチャットを取得できません", err)
+		return res, errors.NewError("IDでホストを取得できません", err)
 	}
 
 	// DB->ドメインモデルに変換します
@@ -100,7 +100,7 @@ func (g Gateway) FindByIDForUpdate(id id.UUID) (domain.Host, error) {
 	if err := g.tx.Set("gorm:query_option", "FOR UPDATE").First(
 		&dbHost, "id = ?", id.String(),
 	).Error; err != nil {
-		return res, errors.NewError("IDでチャットを取得できません", err)
+		return res, errors.NewError("IDでホストを取得できません", err)
 	}
 
 	// DB->ドメインモデルに変換します

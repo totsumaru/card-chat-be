@@ -25,7 +25,7 @@ func VerifyToken(c *gin.Context) (bool, Res) {
 
 	tokenString := bearerToken[1]
 
-	secret := os.Getenv("SECRET")
+	secret := os.Getenv("SUPABASE_JWT_SECRET")
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

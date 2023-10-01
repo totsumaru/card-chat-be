@@ -2,7 +2,7 @@
 
 メッセージを送信します。
 
-自分がホストであれば`host`、パスコードで認証した場合は`guest`として登録します。
+自分がホストであれば`host`、cookieのパスコードで認証した場合は`guest`として登録します。
 
 ```
 [POST] /api/chat/[chat-id]/message
@@ -14,7 +14,7 @@
 
 ### Header
 
-`Authorization`,`Passcode`のどちらか一方は必ず必要です。
+`Authorization`(hostで送信する場合は必要)
 
 - `Authorization`
 
@@ -22,10 +22,10 @@
 Authorization: Bearer [token]
 ```
 
-- `Passcode`
+- `Content-Type`
 
 ```text
-Passcode: [passcode]
+Content-Type: application/x-www-form-urlencoded
 ```
 
 ### Body(Form)

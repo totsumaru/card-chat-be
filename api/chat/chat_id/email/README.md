@@ -16,10 +16,10 @@ Headerのパスコードで認証します。
 
 ### Header
 
-- `Passcode`(required)
+- `Content-Type`
 
 ```text
-Passcode: [passcode]
+Content-Type: application/x-www-form-urlencoded
 ```
 
 ### Body(Form)
