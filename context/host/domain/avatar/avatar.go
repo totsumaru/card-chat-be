@@ -1,6 +1,8 @@
 package avatar
 
 import (
+	"encoding/json"
+
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/url"
 	"github.com/totsumaru/card-chat-be/shared/errors"
@@ -38,5 +40,40 @@ func (a Avatar) URL() url.URL {
 
 // 検証します
 func (a Avatar) validate() error {
+	return nil
+}
+
+// 構造体からJSONに変換します
+func (a Avatar) Marshal() ([]byte, error) {
+	data := struct {
+		ImageID id.UUID `json:"image_id"`
+		URL     url.URL `json:"url"`
+	}{
+		ImageID: a.imageID,
+		URL:     a.url,
+	}
+
+	b, err := json.Marshal(data)
+	if err != nil {
+		return nil, errors.NewError("Marshalに失敗しました", err)
+	}
+
+	return b, nil
+}
+
+// JSONから構造体に変換します
+func (a *Avatar) Unmarshal(b []byte) error {
+	var data struct {
+		ImageID id.UUID `json:"image_id"`
+		URL     url.URL `json:"url"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	a.imageID = data.ImageID
+	a.url = data.URL
+
 	return nil
 }

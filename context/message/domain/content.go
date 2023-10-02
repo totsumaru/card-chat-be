@@ -1,6 +1,10 @@
 package domain
 
-import "github.com/totsumaru/card-chat-be/shared/errors"
+import (
+	"encoding/json"
+
+	"github.com/totsumaru/card-chat-be/shared/errors"
+)
 
 const ContentMaxLen = 500
 
@@ -36,6 +40,37 @@ func (c Content) validate() error {
 	if len(c.value) > ContentMaxLen {
 		return errors.NewError("文字数を超えています")
 	}
+
+	return nil
+}
+
+// 構造体からJSONに変換します
+func (c Content) Marshal() ([]byte, error) {
+	data := struct {
+		Value string `json:"value"`
+	}{
+		Value: c.value,
+	}
+
+	b, err := json.Marshal(data)
+	if err != nil {
+		return nil, errors.NewError("Marshalに失敗しました", err)
+	}
+
+	return b, nil
+}
+
+// JSONから構造体に変換します
+func (c *Content) Unmarshal(b []byte) error {
+	var data struct {
+		Value string `json:"value"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	c.value = data.Value
 
 	return nil
 }

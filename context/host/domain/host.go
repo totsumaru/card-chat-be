@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/totsumaru/card-chat-be/context/host/domain/avatar"
@@ -137,6 +138,65 @@ func (h Host) validate() error {
 	if h.updated.IsZero() {
 		return errors.NewError("更新日時がゼロ値です")
 	}
+
+	return nil
+}
+
+// 構造体からJSONに変換します
+func (h Host) Marshal() ([]byte, error) {
+	data := struct {
+		ID           id.UUID         `json:"id"`
+		Name         Name            `json:"name"`
+		Avatar       avatar.Avatar   `json:"avatar"`
+		Headline     Headline        `json:"headline"`
+		Introduction Introduction    `json:"introduction"`
+		Company      company.Company `json:"company"`
+		Created      time.Time       `json:"created"`
+		Updated      time.Time       `json:"updated"`
+	}{
+		ID:           h.id,
+		Name:         h.name,
+		Avatar:       h.avatar,
+		Headline:     h.headline,
+		Introduction: h.introduction,
+		Company:      h.company,
+		Created:      h.created,
+		Updated:      h.updated,
+	}
+
+	b, err := json.Marshal(data)
+	if err != nil {
+		return nil, errors.NewError("Marshalに失敗しました", err)
+	}
+
+	return b, nil
+}
+
+// JSONから構造体に変換します
+func (h *Host) Unmarshal(b []byte) error {
+	var data struct {
+		ID           id.UUID         `json:"id"`
+		Name         Name            `json:"name"`
+		Avatar       avatar.Avatar   `json:"avatar"`
+		Headline     Headline        `json:"headline"`
+		Introduction Introduction    `json:"introduction"`
+		Company      company.Company `json:"company"`
+		Created      time.Time       `json:"created"`
+		Updated      time.Time       `json:"updated"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	h.id = data.ID
+	h.name = data.Name
+	h.avatar = data.Avatar
+	h.headline = data.Headline
+	h.introduction = data.Introduction
+	h.company = data.Company
+	h.created = data.Created
+	h.updated = data.Updated
 
 	return nil
 }

@@ -1,6 +1,10 @@
 package company
 
-import "github.com/totsumaru/card-chat-be/shared/errors"
+import (
+	"encoding/json"
+
+	"github.com/totsumaru/card-chat-be/shared/errors"
+)
 
 // 会社名の文字数上限です
 const CompanyNameMaxLen = 100
@@ -33,6 +37,37 @@ func (n Name) validate() error {
 	if len(n.value) > CompanyNameMaxLen {
 		return errors.NewError("文字数を超過しています")
 	}
+
+	return nil
+}
+
+// 構造体からJSONに変換します
+func (n Name) Marshal() ([]byte, error) {
+	data := struct {
+		Value string `json:"value"`
+	}{
+		Value: n.value,
+	}
+
+	b, err := json.Marshal(data)
+	if err != nil {
+		return nil, errors.NewError("Marshalに失敗しました", err)
+	}
+
+	return b, nil
+}
+
+// JSONから構造体に変換します
+func (n *Name) Unmarshal(b []byte) error {
+	var data struct {
+		Value string `json:"value"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	n.value = data.Value
 
 	return nil
 }

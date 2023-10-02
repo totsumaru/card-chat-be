@@ -4,6 +4,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"os"
 	"regexp"
@@ -86,4 +87,35 @@ func GeneratePasscodeFromUUID(uuid string) string {
 
 	// 6桁未満の場合も先頭に0をつけて6桁にして返します
 	return fmt.Sprintf("%06d", sixDigitNumber)
+}
+
+// 構造体からJSONに変換します
+func (p Passcode) Marshal() ([]byte, error) {
+	data := struct {
+		Value string `json:"value"`
+	}{
+		Value: p.value,
+	}
+
+	b, err := json.Marshal(data)
+	if err != nil {
+		return nil, errors.NewError("Marshalに失敗しました", err)
+	}
+
+	return b, nil
+}
+
+// JSONから構造体に変換します
+func (p *Passcode) Unmarshal(b []byte) error {
+	var data struct {
+		Value string `json:"value"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	p.value = data.Value
+
+	return nil
 }

@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
@@ -90,6 +91,53 @@ func (m Message) validate() error {
 	if m.created.IsZero() {
 		return errors.NewError("作成日時が設定されていません")
 	}
+
+	return nil
+}
+
+// 構造体からJSONに変換します
+func (m Message) Marshal() ([]byte, error) {
+	data := struct {
+		ID      id.UUID   `json:"id"`
+		ChatID  id.UUID   `json:"chat_id"`
+		FromID  id.UUID   `json:"from_id"`
+		Content Content   `json:"content"`
+		Created time.Time `json:"created"`
+	}{
+		ID:      m.id,
+		ChatID:  m.chatID,
+		FromID:  m.fromID,
+		Content: m.content,
+		Created: m.created,
+	}
+
+	b, err := json.Marshal(data)
+	if err != nil {
+		return nil, errors.NewError("Marshalに失敗しました", err)
+	}
+
+	return b, nil
+}
+
+// JSONから構造体に変換します
+func (m *Message) Unmarshal(b []byte) error {
+	var data struct {
+		ID      id.UUID   `json:"id"`
+		ChatID  id.UUID   `json:"chat_id"`
+		FromID  id.UUID   `json:"from_id"`
+		Content Content   `json:"content"`
+		Created time.Time `json:"created"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	m.id = data.ID
+	m.chatID = data.ChatID
+	m.fromID = data.FromID
+	m.content = data.Content
+	m.created = data.Created
 
 	return nil
 }

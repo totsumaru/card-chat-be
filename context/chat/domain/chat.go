@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/totsumaru/card-chat-be/context/chat/domain/guest"
@@ -182,6 +183,61 @@ func (c Chat) validate() error {
 	if c.passcode.IsEmpty() {
 		return errors.NewError("パスコードが設定されていません")
 	}
+
+	return nil
+}
+
+// 構造体からJSONに変換します
+func (c Chat) Marshal() ([]byte, error) {
+	data := struct {
+		ID        id.UUID             `json:"id"`
+		Passcode  Passcode            `json:"passcode"`
+		HostID    id.UUID             `json:"host_id"`
+		Guest     guest.Guest         `json:"guest"`
+		IsRead    bool                `json:"is_read"`
+		IsClosed  bool                `json:"is_closed"` // 使うかどうかは不明
+		Timestamp timestamp.Timestamp `json:"timestamp"`
+	}{
+		ID:        c.id,
+		Passcode:  c.passcode,
+		HostID:    c.hostID,
+		Guest:     c.guest,
+		IsRead:    c.isRead,
+		IsClosed:  c.isClosed,
+		Timestamp: c.timestamp,
+	}
+
+	b, err := json.Marshal(data)
+	if err != nil {
+		return nil, errors.NewError("Marshalに失敗しました", err)
+	}
+
+	return b, nil
+}
+
+// JSONから構造体に変換します
+func (c *Chat) Unmarshal(b []byte) error {
+	var data struct {
+		ID        id.UUID             `json:"id"`
+		Passcode  Passcode            `json:"passcode"`
+		HostID    id.UUID             `json:"host_id"`
+		Guest     guest.Guest         `json:"guest"`
+		IsRead    bool                `json:"is_read"`
+		IsClosed  bool                `json:"is_closed"` // 使うかどうかは不明
+		Timestamp timestamp.Timestamp `json:"timestamp"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	c.id = data.ID
+	c.passcode = data.Passcode
+	c.hostID = data.HostID
+	c.guest = data.Guest
+	c.isRead = data.IsRead
+	c.isClosed = data.IsClosed
+	c.timestamp = data.Timestamp
 
 	return nil
 }

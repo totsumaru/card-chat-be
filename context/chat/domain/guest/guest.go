@@ -1,6 +1,8 @@
 package guest
 
 import (
+	"encoding/json"
+
 	"github.com/totsumaru/card-chat-be/shared/domain_model/email"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 )
@@ -44,5 +46,44 @@ func (g Guest) Email() email.Email {
 
 // ゲストを検証します
 func (g Guest) validate() error {
+	return nil
+}
+
+// 構造体からJSONに変換します
+func (g Guest) Marshal() ([]byte, error) {
+	data := struct {
+		DisplayName DisplayName `json:"display_name"`
+		Memo        Memo        `json:"memo"`
+		Email       email.Email `json:"email"`
+	}{
+		DisplayName: g.displayName,
+		Memo:        g.memo,
+		Email:       g.email,
+	}
+
+	b, err := json.Marshal(data)
+	if err != nil {
+		return nil, errors.NewError("Marshalに失敗しました", err)
+	}
+
+	return b, nil
+}
+
+// JSONから構造体に変換します
+func (g *Guest) Unmarshal(b []byte) error {
+	var data struct {
+		DisplayName DisplayName `json:"display_name"`
+		Memo        Memo        `json:"memo"`
+		Email       email.Email `json:"email"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	g.displayName = data.DisplayName
+	g.memo = data.Memo
+	g.email = data.Email
+
 	return nil
 }

@@ -1,6 +1,10 @@
 package domain
 
-import "github.com/totsumaru/card-chat-be/shared/errors"
+import (
+	"encoding/json"
+
+	"github.com/totsumaru/card-chat-be/shared/errors"
+)
 
 // ヘッドラインの文字数上限です
 const HeadlineMaxLen = 100
@@ -33,6 +37,37 @@ func (h Headline) validate() error {
 	if len(h.value) > HeadlineMaxLen {
 		return errors.NewError("文字数を超過しています")
 	}
+
+	return nil
+}
+
+// 構造体からJSONに変換します
+func (h Headline) Marshal() ([]byte, error) {
+	data := struct {
+		Value string `json:"value"`
+	}{
+		Value: h.value,
+	}
+
+	b, err := json.Marshal(data)
+	if err != nil {
+		return nil, errors.NewError("Marshalに失敗しました", err)
+	}
+
+	return b, nil
+}
+
+// JSONから構造体に変換します
+func (h *Headline) Unmarshal(b []byte) error {
+	var data struct {
+		Value string `json:"value"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	h.value = data.Value
 
 	return nil
 }

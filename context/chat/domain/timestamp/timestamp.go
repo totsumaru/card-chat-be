@@ -1,6 +1,7 @@
 package timestamp
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/totsumaru/card-chat-be/shared/errors"
@@ -102,6 +103,45 @@ func (t Timestamp) validate() error {
 	if t.updated.IsZero() {
 		return errors.NewError("updatedがゼロ値です")
 	}
+
+	return nil
+}
+
+// 構造体からJSONに変換します
+func (t Timestamp) Marshal() ([]byte, error) {
+	data := struct {
+		Created     time.Time `json:"created"`
+		Updated     time.Time `json:"updated"`
+		LastMessage time.Time `json:"last_message"`
+	}{
+		Created:     t.created,
+		Updated:     t.updated,
+		LastMessage: t.lastMessage,
+	}
+
+	b, err := json.Marshal(data)
+	if err != nil {
+		return nil, errors.NewError("Marshalに失敗しました", err)
+	}
+
+	return b, nil
+}
+
+// JSONから構造体に変換します
+func (t *Timestamp) Unmarshal(b []byte) error {
+	var data struct {
+		Created     time.Time `json:"created"`
+		Updated     time.Time `json:"updated"`
+		LastMessage time.Time `json:"last_message"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	t.created = data.Created
+	t.updated = data.Updated
+	t.lastMessage = data.LastMessage
 
 	return nil
 }

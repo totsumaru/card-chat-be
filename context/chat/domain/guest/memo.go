@@ -1,6 +1,8 @@
 package guest
 
 import (
+	"encoding/json"
+
 	"github.com/totsumaru/card-chat-be/shared/errors"
 )
 
@@ -35,6 +37,37 @@ func (m Memo) validate() error {
 	if len(m.value) > MemoMaxLen {
 		return errors.NewError("文字数を超えています")
 	}
+
+	return nil
+}
+
+// 構造体からJSONに変換します
+func (m Memo) Marshal() ([]byte, error) {
+	data := struct {
+		Value string `json:"value"`
+	}{
+		Value: m.value,
+	}
+
+	b, err := json.Marshal(data)
+	if err != nil {
+		return nil, errors.NewError("Marshalに失敗しました", err)
+	}
+
+	return b, nil
+}
+
+// JSONから構造体に変換します
+func (m *Memo) Unmarshal(b []byte) error {
+	var data struct {
+		Value string `json:"value"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	m.value = data.Value
 
 	return nil
 }
