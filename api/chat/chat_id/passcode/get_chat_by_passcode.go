@@ -1,8 +1,11 @@
 package passcode
 
 import (
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
+	"github.com/totsumaru/card-chat-be/api/internal/cookie"
 	"github.com/totsumaru/card-chat-be/api/internal/res"
 	chat_expose "github.com/totsumaru/card-chat-be/context/chat/expose"
 	host_expose "github.com/totsumaru/card-chat-be/context/host/expose"
@@ -65,20 +68,20 @@ func GetChatByPasscode(e *gin.Engine, db *gorm.DB) {
 			return
 		}
 
-		//isSecure := true
-		//if os.Getenv("ENV") == "dev" {
-		//	isSecure = false
-		//}
+		isSecure := true
+		if os.Getenv("ENV") == "dev" {
+			isSecure = false
+		}
 
 		// cookieを設定
 		c.SetCookie(
-			"hello",  // cookieのkey
-			passcode, // cookieのvalue
-			8.64e+6,  // 有効期限(100日)
-			"/",      // cookieのパス
-			"",       // cookieのドメイン(空文字は現在のドメインのみ)
-			false,    // cookieがセキュアであるかどうか
-			true,     // cookieがhttp専用であるかどうか
+			cookie.PassKey(chatID), // cookieのkey
+			passcode,               // cookieのvalue
+			8.64e+6,                // 有効期限(100日)
+			"/",                    // cookieのパス
+			"",                     // cookieのドメイン(空文字は現在のドメインのみ)
+			isSecure,               // cookieがセキュアであるかどうか
+			true,                   // cookieがhttp専用であるかどうか
 		)
 
 		c.JSON(200, response)
