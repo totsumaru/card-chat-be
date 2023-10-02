@@ -65,10 +65,8 @@ func main() {
 			"Access-Control-Allow-Credentials",
 			"Access-Control-Allow-Headers",
 			"Content-Type",
-			"Content-Length",
-			"Accept-Encoding",
 			"Authorization",
-			"Token",
+			"Passcode",
 		},
 		// cookieなどの情報を必要とするかどうか
 		//AllowCredentials: true,

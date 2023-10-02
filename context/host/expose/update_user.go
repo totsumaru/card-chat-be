@@ -54,7 +54,7 @@ func UpdateHost(tx *gorm.DB, req UpdateHostReq) (Res, error) {
 	avatarURL := h.Avatar().URL()
 
 	// 新規画像がある場合
-	if req.AvatarFile.Size != 0 {
+	if req.AvatarFile != nil && req.AvatarFile.Size != 0 {
 		// CloudflareImageに画像をアップロードします
 		avatarRes, err := cloudflare.UploadImageToCloudflare(h.ID(), req.AvatarFile)
 		if err != nil {
@@ -71,9 +71,10 @@ func UpdateHost(tx *gorm.DB, req UpdateHostReq) (Res, error) {
 			return empty, errors.NewError("画像URLを作成できません", err)
 		}
 
-		// 既存画像がある場合は削除します
-		if avatarRes.ImageID != "" {
-			if err = cloudflare.DeleteImageFromCloudflare(cloudflareImageID); err != nil {
+		// 既存画像がある場合はcloudflareの画像を削除します
+		beforeImageID := h.Avatar().CloudflareImageID()
+		if !beforeImageID.IsEmpty() {
+			if err = cloudflare.DeleteImageFromCloudflare(beforeImageID); err != nil {
 				return empty, errors.NewError("現在のファイルを削除できません", err)
 			}
 		}

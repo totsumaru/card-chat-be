@@ -36,7 +36,8 @@ type Res struct {
 func UploadImageToCloudflare(hostID id.UUID, image *multipart.FileHeader) (Res, error) {
 	res := Res{}
 
-	if image.Size == 0 {
+	if image == nil || image.Size == 0 {
+		fmt.Println("imageが入っていません")
 		return res, nil
 	}
 
@@ -70,8 +71,7 @@ func UploadImageToCloudflare(hostID id.UUID, image *multipart.FileHeader) (Res, 
 	}
 
 	// Multipart writerをクローズしてバウンダリーを書き込む
-	err = writer.Close()
-	if err != nil {
+	if err = writer.Close(); err != nil {
 		return res, err
 	}
 
@@ -108,6 +108,7 @@ func UploadImageToCloudflare(hostID id.UUID, image *multipart.FileHeader) (Res, 
 				ImageID: imageUploadResponse.Result.ID,
 				URL:     imageUploadResponse.Result.Variants[0],
 			}
+			fmt.Println(res)
 			return res, nil
 		}
 	}

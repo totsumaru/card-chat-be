@@ -125,8 +125,8 @@ func (g Gateway) FindByHostID(hostID id.UUID) ([]domain.Chat, error) {
 		"host_id = ?",
 		hostID.String(),
 	).Order(`
-		CASE WHEN IsRead THEN 1 ELSE 0 END,
-		LastMessage DESC
+		CASE WHEN is_read THEN 1 ELSE 0 END,
+		last_message DESC
 	`)
 
 	// レコードの取得
