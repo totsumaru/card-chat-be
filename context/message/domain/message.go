@@ -96,7 +96,7 @@ func (m Message) validate() error {
 }
 
 // 構造体からJSONに変換します
-func (m Message) Marshal() ([]byte, error) {
+func (m Message) MarshalJSON() ([]byte, error) {
 	data := struct {
 		ID      id.UUID   `json:"id"`
 		ChatID  id.UUID   `json:"chat_id"`
@@ -120,7 +120,7 @@ func (m Message) Marshal() ([]byte, error) {
 }
 
 // JSONから構造体に変換します
-func (m *Message) Unmarshal(b []byte) error {
+func (m *Message) UnmarshalJSON(b []byte) error {
 	var data struct {
 		ID      id.UUID   `json:"id"`
 		ChatID  id.UUID   `json:"chat_id"`

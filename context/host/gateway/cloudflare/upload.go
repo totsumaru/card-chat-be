@@ -37,7 +37,6 @@ func UploadImageToCloudflare(hostID id.UUID, image *multipart.FileHeader) (Res, 
 	res := Res{}
 
 	if image == nil || image.Size == 0 {
-		fmt.Println("imageが入っていません")
 		return res, nil
 	}
 
@@ -108,7 +107,6 @@ func UploadImageToCloudflare(hostID id.UUID, image *multipart.FileHeader) (Res, 
 				ImageID: imageUploadResponse.Result.ID,
 				URL:     imageUploadResponse.Result.Variants[0],
 			}
-			fmt.Println(res)
 			return res, nil
 		}
 	}

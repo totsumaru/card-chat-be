@@ -44,7 +44,7 @@ func (a Avatar) validate() error {
 }
 
 // 構造体からJSONに変換します
-func (a Avatar) Marshal() ([]byte, error) {
+func (a Avatar) MarshalJSON() ([]byte, error) {
 	data := struct {
 		ImageID id.UUID `json:"image_id"`
 		URL     url.URL `json:"url"`
@@ -62,7 +62,7 @@ func (a Avatar) Marshal() ([]byte, error) {
 }
 
 // JSONから構造体に変換します
-func (a *Avatar) Unmarshal(b []byte) error {
+func (a *Avatar) UnmarshalJSON(b []byte) error {
 	var data struct {
 		ImageID id.UUID `json:"image_id"`
 		URL     url.URL `json:"url"`

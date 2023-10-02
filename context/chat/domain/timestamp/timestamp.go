@@ -108,7 +108,7 @@ func (t Timestamp) validate() error {
 }
 
 // 構造体からJSONに変換します
-func (t Timestamp) Marshal() ([]byte, error) {
+func (t Timestamp) MarshalJSON() ([]byte, error) {
 	data := struct {
 		Created     time.Time `json:"created"`
 		Updated     time.Time `json:"updated"`
@@ -128,7 +128,7 @@ func (t Timestamp) Marshal() ([]byte, error) {
 }
 
 // JSONから構造体に変換します
-func (t *Timestamp) Unmarshal(b []byte) error {
+func (t *Timestamp) UnmarshalJSON(b []byte) error {
 	var data struct {
 		Created     time.Time `json:"created"`
 		Updated     time.Time `json:"updated"`

@@ -1,6 +1,7 @@
 package url
 
 import (
+	"encoding/json"
 	"net/url"
 
 	"github.com/totsumaru/card-chat-be/shared/errors"
@@ -41,6 +42,37 @@ func (u URL) validate() error {
 	if err != nil {
 		return errors.NewError("URLが不正です")
 	}
+
+	return nil
+}
+
+// 構造体からJSONに変換します
+func (u URL) MarshalJSON() ([]byte, error) {
+	data := struct {
+		Value string `json:"value"`
+	}{
+		Value: u.value,
+	}
+
+	b, err := json.Marshal(data)
+	if err != nil {
+		return nil, errors.NewError("Marshalに失敗しました", err)
+	}
+
+	return b, nil
+}
+
+// JSONから構造体に変換します
+func (u *URL) UnmarshalJSON(b []byte) error {
+	var data struct {
+		Value string `json:"value"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	u.value = data.Value
 
 	return nil
 }

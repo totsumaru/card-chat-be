@@ -90,7 +90,7 @@ func GeneratePasscodeFromUUID(uuid string) string {
 }
 
 // 構造体からJSONに変換します
-func (p Passcode) Marshal() ([]byte, error) {
+func (p Passcode) MarshalJSON() ([]byte, error) {
 	data := struct {
 		Value string `json:"value"`
 	}{
@@ -106,7 +106,7 @@ func (p Passcode) Marshal() ([]byte, error) {
 }
 
 // JSONから構造体に変換します
-func (p *Passcode) Unmarshal(b []byte) error {
+func (p *Passcode) UnmarshalJSON(b []byte) error {
 	var data struct {
 		Value string `json:"value"`
 	}

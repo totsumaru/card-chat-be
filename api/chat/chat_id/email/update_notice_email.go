@@ -1,8 +1,6 @@
 package email
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
 	"github.com/totsumaru/card-chat-be/api/internal/cookie"
@@ -17,8 +15,6 @@ func UpdateNoticeEmail(e *gin.Engine, db *gorm.DB) {
 		chatID := c.Param("chatID")
 
 		email := c.PostForm("email")
-
-		fmt.Println("メールアドレス: ", email)
 
 		cookiePasscode, err := c.Cookie(cookie.PassKey(chatID))
 		if err != nil {

@@ -50,7 +50,7 @@ func (g Guest) validate() error {
 }
 
 // 構造体からJSONに変換します
-func (g Guest) Marshal() ([]byte, error) {
+func (g Guest) MarshalJSON() ([]byte, error) {
 	data := struct {
 		DisplayName DisplayName `json:"display_name"`
 		Memo        Memo        `json:"memo"`
@@ -70,7 +70,7 @@ func (g Guest) Marshal() ([]byte, error) {
 }
 
 // JSONから構造体に変換します
-func (g *Guest) Unmarshal(b []byte) error {
+func (g *Guest) UnmarshalJSON(b []byte) error {
 	var data struct {
 		DisplayName DisplayName `json:"display_name"`
 		Memo        Memo        `json:"memo"`

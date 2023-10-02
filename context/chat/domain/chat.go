@@ -2,7 +2,6 @@ package domain
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/totsumaru/card-chat-be/context/chat/domain/guest"
 	"github.com/totsumaru/card-chat-be/context/chat/domain/timestamp"
@@ -84,7 +83,6 @@ func RestoreChat(
 //
 // チャット開始時の処理です。
 func (c *Chat) SetHostID(hostID id.UUID) error {
-	fmt.Println("ホストID: ", hostID)
 	if !c.hostID.IsEmpty() {
 		return errors.NewError("ホストIDがすでに設定されています")
 	}
@@ -113,8 +111,6 @@ func (c *Chat) UpdateGuest(g guest.Guest) error {
 
 	c.guest = g
 	c.timestamp = newTimestamp
-
-	fmt.Println("UpdateGuestのEmail: ", c.guest.Email().String())
 
 	if err = c.validate(); err != nil {
 		return errors.NewError("検証に失敗しました", err)
@@ -188,7 +184,7 @@ func (c Chat) validate() error {
 }
 
 // 構造体からJSONに変換します
-func (c Chat) Marshal() ([]byte, error) {
+func (c Chat) MarshalJSON() ([]byte, error) {
 	data := struct {
 		ID        id.UUID             `json:"id"`
 		Passcode  Passcode            `json:"passcode"`
@@ -216,7 +212,7 @@ func (c Chat) Marshal() ([]byte, error) {
 }
 
 // JSONから構造体に変換します
-func (c *Chat) Unmarshal(b []byte) error {
+func (c *Chat) UnmarshalJSON(b []byte) error {
 	var data struct {
 		ID        id.UUID             `json:"id"`
 		Passcode  Passcode            `json:"passcode"`

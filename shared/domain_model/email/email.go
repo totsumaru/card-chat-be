@@ -1,7 +1,7 @@
 package email
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/mail"
 
 	"github.com/totsumaru/card-chat-be/shared/errors"
@@ -20,7 +20,6 @@ func NewEmail(value string) (Email, error) {
 	res := Email{
 		value: value,
 	}
-	fmt.Println("ドメインのメール: ", res.value)
 
 	if err := res.validate(); err != nil {
 		return res, errors.NewError("検証に失敗しました", err)
@@ -47,6 +46,37 @@ func (e Email) validate() error {
 	if _, err := mail.ParseAddress(e.value); err != nil {
 		return errors.NewError("メールアドレスが不正な形式です")
 	}
+
+	return nil
+}
+
+// 構造体からJSONに変換します
+func (e Email) MarshalJSON() ([]byte, error) {
+	data := struct {
+		Value string `json:"value"`
+	}{
+		Value: e.value,
+	}
+
+	b, err := json.Marshal(data)
+	if err != nil {
+		return nil, errors.NewError("Marshalに失敗しました", err)
+	}
+
+	return b, nil
+}
+
+// JSONから構造体に変換します
+func (e *Email) UnmarshalJSON(b []byte) error {
+	var data struct {
+		Value string `json:"value"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	e.value = data.Value
 
 	return nil
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -80,6 +79,4 @@ func main() {
 	if err := engine.Run(":8080"); err != nil {
 		log.Fatal("起動に失敗しました", err)
 	}
-
-	fmt.Println("success!!")
 }

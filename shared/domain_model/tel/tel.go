@@ -1,6 +1,7 @@
 package tel
 
 import (
+	"encoding/json"
 	"regexp"
 
 	"github.com/totsumaru/card-chat-be/shared/errors"
@@ -48,6 +49,37 @@ func (t Tel) validate() error {
 	if !regex.MatchString(t.value) {
 		return errors.NewError("数字とハイフン以外が入っています")
 	}
+
+	return nil
+}
+
+// 構造体からJSONに変換します
+func (t Tel) MarshalJSON() ([]byte, error) {
+	data := struct {
+		Value string `json:"value"`
+	}{
+		Value: t.value,
+	}
+
+	b, err := json.Marshal(data)
+	if err != nil {
+		return nil, errors.NewError("Marshalに失敗しました", err)
+	}
+
+	return b, nil
+}
+
+// JSONから構造体に変換します
+func (t *Tel) UnmarshalJSON(b []byte) error {
+	var data struct {
+		Value string `json:"value"`
+	}
+
+	if err := json.Unmarshal(b, &data); err != nil {
+		return err
+	}
+
+	t.value = data.Value
 
 	return nil
 }

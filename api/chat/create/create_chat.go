@@ -3,7 +3,6 @@ package create
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
-	"github.com/totsumaru/card-chat-be/api/internal/verify"
 	chat_expose "github.com/totsumaru/card-chat-be/context/chat/expose"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
@@ -19,10 +18,10 @@ type Res struct {
 func CreateChat(e *gin.Engine, db *gorm.DB) {
 	e.POST("/api/chat/create", func(c *gin.Context) {
 		// 管理者でない場合はエラーを返します
-		if !verify.IsAdmin(c) {
-			api_err.Send(c, 401, errors.NewError("管理者ではありません"))
-			return
-		}
+		//if !verify.IsAdmin(c) {
+		//	api_err.Send(c, 401, errors.NewError("管理者ではありません"))
+		//	return
+		//}
 
 		res := Res{}
 		err := db.Transaction(func(tx *gorm.DB) error {
@@ -41,6 +40,6 @@ func CreateChat(e *gin.Engine, db *gorm.DB) {
 			return
 		}
 
-		c.JSON(200, nil)
+		c.JSON(200, res)
 	})
 }

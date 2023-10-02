@@ -2,6 +2,7 @@ package domain
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/totsumaru/card-chat-be/context/host/domain/avatar"
@@ -143,7 +144,7 @@ func (h Host) validate() error {
 }
 
 // 構造体からJSONに変換します
-func (h Host) Marshal() ([]byte, error) {
+func (h Host) MarshalJSON() ([]byte, error) {
 	data := struct {
 		ID           id.UUID         `json:"id"`
 		Name         Name            `json:"name"`
@@ -163,17 +164,21 @@ func (h Host) Marshal() ([]byte, error) {
 		Created:      h.created,
 		Updated:      h.updated,
 	}
+	fmt.Println("hello")
 
 	b, err := json.Marshal(data)
 	if err != nil {
 		return nil, errors.NewError("Marshalに失敗しました", err)
 	}
 
+	fmt.Println("hello")
+	fmt.Println(string(b))
+
 	return b, nil
 }
 
 // JSONから構造体に変換します
-func (h *Host) Unmarshal(b []byte) error {
+func (h *Host) UnmarshalJSON(b []byte) error {
 	var data struct {
 		ID           id.UUID         `json:"id"`
 		Name         Name            `json:"name"`

@@ -42,7 +42,7 @@ func (p Position) validate() error {
 }
 
 // 構造体からJSONに変換します
-func (p Position) Marshal() ([]byte, error) {
+func (p Position) MarshalJSON() ([]byte, error) {
 	data := struct {
 		Value string `json:"value"`
 	}{
@@ -58,7 +58,7 @@ func (p Position) Marshal() ([]byte, error) {
 }
 
 // JSONから構造体に変換します
-func (p *Position) Unmarshal(b []byte) error {
+func (p *Position) UnmarshalJSON(b []byte) error {
 	var data struct {
 		Value string `json:"value"`
 	}

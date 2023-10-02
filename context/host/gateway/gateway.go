@@ -1,14 +1,12 @@
 package gateway
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/totsumaru/card-chat-be/context/host/domain"
-	"github.com/totsumaru/card-chat-be/context/host/domain/avatar"
-	"github.com/totsumaru/card-chat-be/context/host/domain/company"
 	"github.com/totsumaru/card-chat-be/shared/database"
-	"github.com/totsumaru/card-chat-be/shared/domain_model/email"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
-	"github.com/totsumaru/card-chat-be/shared/domain_model/tel"
-	"github.com/totsumaru/card-chat-be/shared/domain_model/url"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
@@ -34,7 +32,12 @@ func NewGateway(tx *gorm.DB) (Gateway, error) {
 //
 // 同じIDのレコードが存在する場合はエラーを返します。
 func (g Gateway) Create(u domain.Host) error {
-	dbHost := castToDBHost(u)
+	fmt.Println("ドメインをDBの形に変換します")
+	dbHost, err := castToDBHost(u)
+	fmt.Println("ドメインをDBの形に変更OK")
+	if err != nil {
+		return errors.NewError("ドメインモデルをDBの構造体に変換できません", err)
+	}
 
 	// 新しいレコードをデータベースに保存
 	result := g.tx.Create(&dbHost)
@@ -51,7 +54,10 @@ func (g Gateway) Create(u domain.Host) error {
 
 // 更新します
 func (g Gateway) Update(u domain.Host) error {
-	dbHost := castToDBHost(u)
+	dbHost, err := castToDBHost(u)
+	if err != nil {
+		return errors.NewError("ドメインモデルをDBの構造体に変換できません", err)
+	}
 
 	// IDに基づいてレコードを更新
 	result := g.tx.Model(&database.HostSchema{}).Where(
@@ -113,93 +119,26 @@ func (g Gateway) FindByIDForUpdate(id id.UUID) (domain.Host, error) {
 }
 
 // ドメインモデルをDBの構造体に変換します
-func castToDBHost(u domain.Host) database.HostSchema {
-	return database.HostSchema{
-		ID:            u.ID().String(),
-		Name:          u.Name().String(),
-		AvatarImageID: u.Avatar().ImageID().String(),
-		AvatarURL:     u.Avatar().URL().String(),
-		Headline:      u.Headline().String(),
-		Introduction:  u.Introduction().String(),
-		CompanyName:   u.Company().Name().String(),
-		Position:      u.Company().Position().String(),
-		Tel:           u.Company().Tel().String(),
-		Email:         u.Company().Email().String(),
-		Website:       u.Company().Website().String(),
-		Created:       u.Created(),
-		Updated:       u.Updated(),
+func castToDBHost(domainHost domain.Host) (database.HostSchema, error) {
+	res := database.HostSchema{}
+
+	b, err := json.Marshal(&domainHost)
+	if err != nil {
+		return res, errors.NewError("Marshalに失敗しました", err)
 	}
+
+	return database.HostSchema{
+		ID:   domainHost.ID().String(),
+		Data: b,
+	}, nil
 }
 
 // DBの構造体からドメインモデルに変換します
 func castToDomainModel(dbHost database.HostSchema) (domain.Host, error) {
 	res := domain.Host{}
 
-	hID, err := id.RestoreUUID(dbHost.ID)
-	if err != nil {
-		return res, errors.NewError("IDを復元できません", err)
-	}
-
-	name, err := domain.NewName(dbHost.Name)
-	if err != nil {
-		return res, errors.NewError("名前を作成できません", err)
-	}
-
-	// アバター
-	imageID, err := id.RestoreAllowEmptyUUID(dbHost.AvatarImageID)
-	if err != nil {
-		return res, errors.NewError("画像IDを作成できません", err)
-	}
-	avatarURL, err := url.NewURL(dbHost.AvatarURL)
-	if err != nil {
-		return res, errors.NewError("アバターURLを作成できません", err)
-	}
-	avt, err := avatar.NewAvatar(imageID, avatarURL)
-	if err != nil {
-		return res, errors.NewError("アバターを作成できません", err)
-	}
-
-	headline, err := domain.NewHeadline(dbHost.Headline)
-	if err != nil {
-		return res, errors.NewError("ヘッドラインを作成できません", err)
-	}
-
-	intro, err := domain.NewIntroduction(dbHost.Introduction)
-	if err != nil {
-		return res, errors.NewError("自己紹介を作成できません", err)
-	}
-
-	// 会社情報を作成
-	companyName, err := company.NewName(dbHost.CompanyName)
-	if err != nil {
-		return res, errors.NewError("会社名を作成できません", err)
-	}
-	position, err := company.NewPosition(dbHost.Position)
-	if err != nil {
-		return res, errors.NewError("ポジションを作成できません", err)
-	}
-	t, err := tel.NewTel(dbHost.Tel)
-	if err != nil {
-		return res, errors.NewError("電話番号を作成できません", err)
-	}
-	mail, err := email.NewEmail(dbHost.Email)
-	if err != nil {
-		return res, errors.NewError("メールアドレスを作成できません", err)
-	}
-	website, err := url.NewURL(dbHost.Website)
-	if err != nil {
-		return res, errors.NewError("Websiteを作成できません", err)
-	}
-	comp, err := company.NewCompany(companyName, position, t, mail, website)
-	if err != nil {
-		return res, errors.NewError("会社情報を作成できません", err)
-	}
-
-	res, err = domain.RestoreHost(
-		hID, name, avt, headline, intro, comp, dbHost.Created, dbHost.Updated,
-	)
-	if err != nil {
-		return res, errors.NewError("ホストを復元できません", err)
+	if err := json.Unmarshal(dbHost.Data, &res); err != nil {
+		return res, errors.NewError("Unmarshalに失敗しました", err)
 	}
 
 	return res, nil

@@ -42,7 +42,7 @@ func (m Memo) validate() error {
 }
 
 // 構造体からJSONに変換します
-func (m Memo) Marshal() ([]byte, error) {
+func (m Memo) MarshalJSON() ([]byte, error) {
 	data := struct {
 		Value string `json:"value"`
 	}{
@@ -58,7 +58,7 @@ func (m Memo) Marshal() ([]byte, error) {
 }
 
 // JSONから構造体に変換します
-func (m *Memo) Unmarshal(b []byte) error {
+func (m *Memo) UnmarshalJSON(b []byte) error {
 	var data struct {
 		Value string `json:"value"`
 	}
