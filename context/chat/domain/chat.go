@@ -113,6 +113,8 @@ func (c *Chat) UpdateGuest(g guest.Guest) error {
 	c.guest = g
 	c.timestamp = newTimestamp
 
+	fmt.Println("UpdateGuestのEmail: ", c.guest.Email().String())
+
 	if err = c.validate(); err != nil {
 		return errors.NewError("検証に失敗しました", err)
 	}

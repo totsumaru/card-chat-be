@@ -8,15 +8,15 @@ import (
 
 // アバターです
 type Avatar struct {
-	cloudflareImageID id.UUID
-	url               url.URL
+	imageID id.UUID // cloudflareの画像IDです
+	url     url.URL
 }
 
 // アバターを作成します
 func NewAvatar(imageID id.UUID, url url.URL) (Avatar, error) {
 	res := Avatar{
-		cloudflareImageID: imageID,
-		url:               url,
+		imageID: imageID,
+		url:     url,
 	}
 
 	if err := res.validate(); err != nil {
@@ -27,8 +27,8 @@ func NewAvatar(imageID id.UUID, url url.URL) (Avatar, error) {
 }
 
 // 画像IDを取得します
-func (a Avatar) CloudflareImageID() id.UUID {
-	return a.cloudflareImageID
+func (a Avatar) ImageID() id.UUID {
+	return a.imageID
 }
 
 // URLを取得します

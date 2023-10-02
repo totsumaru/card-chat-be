@@ -1,10 +1,9 @@
 package chat_id
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
+	"github.com/totsumaru/card-chat-be/api/internal/cookie"
 	"github.com/totsumaru/card-chat-be/api/internal/res"
 	"github.com/totsumaru/card-chat-be/api/internal/verify"
 	chat_expose "github.com/totsumaru/card-chat-be/context/chat/expose"
@@ -105,13 +104,7 @@ func GetChat(e *gin.Engine, db *gorm.DB) {
 				// 自分がホストではない(ゲストorビジター)場合
 
 				// cookie or header のパスコードと、チャットのパスコードが一致する場合
-				// TODO: 修正
-				//cookiePasscode, err := c.Cookie(cookie.PassKey(apiChatRes.ID))
-				cookiePasscode, err := c.Cookie("hello")
-				if err != nil {
-					fmt.Println("エラー: ", err)
-				}
-				fmt.Println("cookieパスコード: ", cookiePasscode)
+				cookiePasscode, err := c.Cookie(cookie.PassKey(apiChatRes.ID))
 				if err == nil && (cookiePasscode == apiChatRes.Passcode) {
 					c.JSON(200, Res{
 						Status:   statusGuest,

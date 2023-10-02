@@ -1,6 +1,8 @@
 package expose
 
 import (
+	"fmt"
+
 	"github.com/totsumaru/card-chat-be/context/chat/domain/guest"
 	"github.com/totsumaru/card-chat-be/context/chat/gateway"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/email"
@@ -42,6 +44,8 @@ func UpdateEmail(tx *gorm.DB, chatID, mail string) (Res, error) {
 	if err = c.UpdateGuest(g); err != nil {
 		return empty, errors.NewError("ゲストを更新できません", err)
 	}
+
+	fmt.Println("C: ", c.Guest().Email().String())
 
 	if err = gw.Update(c); err != nil {
 		return empty, errors.NewError("DBを更新できません", err)

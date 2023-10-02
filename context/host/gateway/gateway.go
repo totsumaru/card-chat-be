@@ -117,7 +117,7 @@ func castToDBHost(u domain.Host) database.HostSchema {
 	return database.HostSchema{
 		ID:            u.ID().String(),
 		Name:          u.Name().String(),
-		AvatarImageID: u.Avatar().CloudflareImageID().String(),
+		AvatarImageID: u.Avatar().ImageID().String(),
 		AvatarURL:     u.Avatar().URL().String(),
 		Headline:      u.Headline().String(),
 		Introduction:  u.Introduction().String(),

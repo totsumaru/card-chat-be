@@ -1,6 +1,7 @@
 package email
 
 import (
+	"fmt"
 	"net/mail"
 
 	"github.com/totsumaru/card-chat-be/shared/errors"
@@ -19,6 +20,7 @@ func NewEmail(value string) (Email, error) {
 	res := Email{
 		value: value,
 	}
+	fmt.Println("ドメインのメール: ", res.value)
 
 	if err := res.validate(); err != nil {
 		return res, errors.NewError("検証に失敗しました", err)

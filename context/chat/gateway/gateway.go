@@ -152,13 +152,19 @@ func (g Gateway) FindByHostID(hostID id.UUID) ([]domain.Chat, error) {
 
 // ドメインモデルをDBの構造体に変換します
 func castToDBChat(c domain.Chat) database.ChatSchema {
+	var mail *string
+	if c.Guest().Email().String() != "" {
+		emailStr := c.Guest().Email().String()
+		mail = &emailStr
+	}
+
 	return database.ChatSchema{
 		ID:          c.ID().String(),
 		Passcode:    c.Passcode().String(),
 		HostID:      c.HostID().String(),
 		DisplayName: c.Guest().DisplayName().String(),
 		Memo:        c.Guest().Memo().String(),
-		Email:       c.Guest().Email().String(),
+		Email:       mail,
 		IsRead:      c.IsRead(),
 		IsClosed:    c.IsClosed(),
 		Created:     c.Timestamp().Created(),
@@ -199,7 +205,11 @@ func castToDomainModelChat(dbChat database.ChatSchema) (domain.Chat, error) {
 	if err != nil {
 		return res, errors.NewError("メモを復元できません", err)
 	}
-	mail, err := email.NewEmail(dbChat.Email)
+	var emailStr string
+	if dbChat.Email != nil {
+		emailStr = *dbChat.Email
+	}
+	mail, err := email.NewEmail(emailStr)
 	if err != nil {
 		return res, errors.NewError("メールアドレスを復元できません", err)
 	}

@@ -12,11 +12,11 @@ import (
 )
 
 // CloudflareImageから画像を削除します
-func DeleteImageFromCloudflare(cloudflareImageID id.UUID) error {
+func DeleteImageFromCloudflare(imageID id.UUID) error {
 	url := fmt.Sprintf(
 		"https://api.cloudflare.com/client/v4/accounts/%s/images/v1/%s",
 		os.Getenv("CLOUDFLARE_ACCOUNT_ID"),
-		cloudflareImageID.String(),
+		imageID.String(),
 	)
 
 	req, err := http.NewRequest(http.MethodDelete, url, nil)

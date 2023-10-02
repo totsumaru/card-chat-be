@@ -21,6 +21,7 @@ type HostSchema struct {
 	Website       string
 	Created       time.Time
 	Updated       time.Time
+	Data          []byte
 }
 
 // チャットのDBです
@@ -30,7 +31,7 @@ type ChatSchema struct {
 	HostID      string `gorm:"index"`
 	DisplayName string
 	Memo        string
-	Email       string
+	Email       *string
 	IsRead      bool
 	IsClosed    bool
 	Created     time.Time

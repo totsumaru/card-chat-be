@@ -21,17 +21,13 @@ func SendMessage(e *gin.Engine, db *gorm.DB) {
 
 		content := c.PostForm("content")
 
-		cookiePasscode, _ := c.Cookie(cookie.PassKey(chatID))
-
 		var fromID string
 
 		// 認証をします
 		isLogin, verifyRes := verify.VerifyToken(c)
 
-		// パスコードが正しい場合は、fromIDにチャットIDを設定します
-		if chat_expose.IsValidPasscode(chatID, cookiePasscode) {
-			fromID = chatID
-		} else if isLogin {
+		// ホストの場合は、fromIDにホストIDを設定します
+		if isLogin {
 			// ホストの場合は、fromIDにホストIDを設定します
 			isHost, err := verify.IsHost(db, chatID, verifyRes.HostID)
 			if err != nil {
@@ -40,6 +36,12 @@ func SendMessage(e *gin.Engine, db *gorm.DB) {
 			}
 			if isHost {
 				fromID = verifyRes.HostID
+			}
+		} else {
+			cookiePasscode, _ := c.Cookie(cookie.PassKey(chatID))
+			if chat_expose.IsValidPasscode(chatID, cookiePasscode) {
+				// パスコードが正しい場合は、fromIDにチャットIDを設定します
+				fromID = chatID
 			}
 		}
 
