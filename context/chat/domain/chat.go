@@ -1,6 +1,8 @@
 package domain
 
 import (
+	"fmt"
+
 	"github.com/totsumaru/card-chat-be/context/chat/domain/guest"
 	"github.com/totsumaru/card-chat-be/context/chat/domain/timestamp"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
@@ -81,7 +83,8 @@ func RestoreChat(
 //
 // チャット開始時の処理です。
 func (c *Chat) SetHostID(hostID id.UUID) error {
-	if !hostID.IsEmpty() {
+	fmt.Println("ホストID: ", hostID)
+	if !c.hostID.IsEmpty() {
 		return errors.NewError("ホストIDがすでに設定されています")
 	}
 

@@ -65,6 +65,22 @@ func GetChatByPasscode(e *gin.Engine, db *gorm.DB) {
 			return
 		}
 
+		//isSecure := true
+		//if os.Getenv("ENV") == "dev" {
+		//	isSecure = false
+		//}
+
+		// cookieを設定
+		c.SetCookie(
+			"hello",  // cookieのkey
+			passcode, // cookieのvalue
+			8.64e+6,  // 有効期限(100日)
+			"/",      // cookieのパス
+			"",       // cookieのドメイン(空文字は現在のドメインのみ)
+			false,    // cookieがセキュアであるかどうか
+			true,     // cookieがhttp専用であるかどうか
+		)
+
 		c.JSON(200, response)
 	})
 }

@@ -45,7 +45,7 @@ func CastToChatAPIResForGuest(backendRes chatExpose.Res) ChatAPIRes {
 // バックエンドのレスポンスをAPIのレスポンスに変換します
 func castToChatAPIRes(backendResChat chatExpose.Res) ChatAPIRes {
 	res := ChatAPIRes{}
-	res.ID = backendResChat.Passcode
+	res.ID = backendResChat.ID
 	res.Passcode = backendResChat.Passcode
 	res.HostID = backendResChat.HostID
 	res.Guest.DisplayName = backendResChat.Guest.DisplayName

@@ -1,6 +1,8 @@
 package expose
 
-import "github.com/totsumaru/card-chat-be/context/chat/domain"
+import (
+	"github.com/totsumaru/card-chat-be/context/chat/domain"
+)
 
 // パスコードが正しいかを検証します
 func IsValidPasscode(chatID string, passcode string) bool {

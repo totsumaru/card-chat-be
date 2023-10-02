@@ -52,7 +52,7 @@ func main() {
 	engine.Use(cors.New(cors.Config{
 		// アクセスを許可したいアクセス元
 		AllowOrigins: []string{
-			"*",
+			"http://localhost:3000",
 		},
 		// アクセスを許可したいHTTPメソッド(以下の例だとPUTやDELETEはアクセスできません)
 		AllowMethods: []string{
@@ -69,7 +69,7 @@ func main() {
 			"Passcode",
 		},
 		// cookieなどの情報を必要とするかどうか
-		//AllowCredentials: true,
+		AllowCredentials: true,
 		// preflightリクエストの結果をキャッシュする時間
 		//MaxAge: 24 * time.Hour,
 	}))
@@ -78,7 +78,7 @@ func main() {
 	api.RegisterRouter(engine, db)
 
 	if err := engine.Run(":8080"); err != nil {
-		log.Fatal("起動に失敗しました")
+		log.Fatal("起動に失敗しました", err)
 	}
 
 	fmt.Println("success!!")

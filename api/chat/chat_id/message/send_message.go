@@ -21,11 +21,7 @@ func SendMessage(e *gin.Engine, db *gorm.DB) {
 
 		content := c.PostForm("content")
 
-		cookiePasscode, err := c.Cookie(cookie.PassKey(chatID))
-		if err != nil {
-			api_err.Send(c, 401, errors.NewError("cookieのパスコードを取得できません", err))
-			return
-		}
+		cookiePasscode, _ := c.Cookie(cookie.PassKey(chatID))
 
 		var fromID string
 
@@ -53,7 +49,7 @@ func SendMessage(e *gin.Engine, db *gorm.DB) {
 		}
 
 		// Tx
-		err = db.Transaction(func(tx *gorm.DB) error {
+		err := db.Transaction(func(tx *gorm.DB) error {
 			_, err := message_expose.CreateMessage(tx, chatID, fromID, content)
 			if err != nil {
 				return errors.NewError("メッセージを作成できません", err)
