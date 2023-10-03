@@ -7,11 +7,10 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/totsumaru/card-chat-be/api"
 	"github.com/totsumaru/card-chat-be/shared/database"
 	"github.com/totsumaru/card-chat-be/shared/errors"
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -25,8 +24,8 @@ func init() {
 }
 
 func main() {
-	f := sqlite.Open(database.DBName)
-	db, err := gorm.Open(f, &gorm.Config{
+	dialector := postgres.Open(os.Getenv("DB_URL"))
+	db, err := gorm.Open(dialector, &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {

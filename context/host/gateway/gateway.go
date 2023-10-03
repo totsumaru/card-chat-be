@@ -124,16 +124,15 @@ func castToDBHost(domainHost domain.Host) (database.HostSchema, error) {
 		return res, errors.NewError("Marshalに失敗しました", err)
 	}
 
-	return database.HostSchema{
-		ID:   domainHost.ID().String(),
-		Data: b,
-	}, nil
+	res.ID = domainHost.ID().String()
+	res.Data = b
+
+	return res, nil
 }
 
 // DBの構造体からドメインモデルに変換します
 func castToDomainModel(dbHost database.HostSchema) (domain.Host, error) {
 	res := domain.Host{}
-
 	if err := json.Unmarshal(dbHost.Data, &res); err != nil {
 		return res, errors.NewError("Unmarshalに失敗しました", err)
 	}
