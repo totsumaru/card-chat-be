@@ -2,7 +2,6 @@ package domain
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/totsumaru/card-chat-be/context/host/domain/avatar"
@@ -164,15 +163,11 @@ func (h Host) MarshalJSON() ([]byte, error) {
 		Created:      h.created,
 		Updated:      h.updated,
 	}
-	fmt.Println("hello")
 
 	b, err := json.Marshal(data)
 	if err != nil {
 		return nil, errors.NewError("Marshalに失敗しました", err)
 	}
-
-	fmt.Println("hello")
-	fmt.Println(string(b))
 
 	return b, nil
 }

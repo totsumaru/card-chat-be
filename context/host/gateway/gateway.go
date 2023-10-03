@@ -2,7 +2,6 @@ package gateway
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/totsumaru/card-chat-be/context/host/domain"
 	"github.com/totsumaru/card-chat-be/shared/database"
@@ -32,9 +31,7 @@ func NewGateway(tx *gorm.DB) (Gateway, error) {
 //
 // 同じIDのレコードが存在する場合はエラーを返します。
 func (g Gateway) Create(u domain.Host) error {
-	fmt.Println("ドメインをDBの形に変換します")
 	dbHost, err := castToDBHost(u)
-	fmt.Println("ドメインをDBの形に変更OK")
 	if err != nil {
 		return errors.NewError("ドメインモデルをDBの構造体に変換できません", err)
 	}
