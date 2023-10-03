@@ -17,6 +17,7 @@ type Res struct {
 // チャットを作成します
 func CreateChat(e *gin.Engine, db *gorm.DB) {
 	e.POST("/api/chat/create", func(c *gin.Context) {
+		// TODO: コメントアウトを外す
 		// 管理者でない場合はエラーを返します
 		//if !verify.IsAdmin(c) {
 		//	api_err.Send(c, 401, errors.NewError("管理者ではありません"))

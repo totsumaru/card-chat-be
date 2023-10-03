@@ -5,11 +5,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
+	"github.com/totsumaru/card-chat-be/api/internal/res"
 	"github.com/totsumaru/card-chat-be/api/internal/verify"
 	host_expose "github.com/totsumaru/card-chat-be/context/host/expose"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
+
+// レスポンスです
+type Res struct {
+	Host res.HostAPIRes `json:"host"`
+}
 
 // ホストのプロフィールを編集します
 func EditHostProfile(e *gin.Engine, db *gorm.DB) {
@@ -17,12 +23,14 @@ func EditHostProfile(e *gin.Engine, db *gorm.DB) {
 		hostID := c.Param("hostID")
 
 		// 認証
-		isLogin, res := verify.VerifyToken(c)
-		if !isLogin || hostID != res.HostID {
+		isLogin, verifyRes := verify.VerifyToken(c)
+		if !isLogin || hostID != verifyRes.HostID {
 			api_err.Send(c, 401, errors.NewError("認証できません"))
 			return
 		}
 
+		// Tx
+		apiRes := Res{}
 		err := db.Transaction(func(tx *gorm.DB) error {
 			// ファイルが添付されていない場合はエラーにならない
 			avatarImageFile, err := c.FormFile("avatar")
@@ -43,10 +51,12 @@ func EditHostProfile(e *gin.Engine, db *gorm.DB) {
 				Website:      c.PostForm("website"),
 			}
 
-			_, err = host_expose.UpdateHost(tx, req)
+			hostExposeRes, err := host_expose.UpdateHost(tx, req)
 			if err != nil {
 				return errors.NewError("ホストの情報を変更できません", err)
 			}
+
+			apiRes.Host = res.CastToHostAPIRes(hostExposeRes)
 
 			return nil
 		})
@@ -55,6 +65,6 @@ func EditHostProfile(e *gin.Engine, db *gorm.DB) {
 			return
 		}
 
-		c.JSON(200, nil)
+		c.JSON(200, apiRes)
 	})
 }

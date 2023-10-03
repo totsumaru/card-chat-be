@@ -3,11 +3,17 @@ package edit
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
+	"github.com/totsumaru/card-chat-be/api/internal/res"
 	"github.com/totsumaru/card-chat-be/api/internal/verify"
 	chat_expose "github.com/totsumaru/card-chat-be/context/chat/expose"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
+
+// APIのレスポンスです
+type Res struct {
+	Chat res.ChatAPIRes `json:"chat"`
+}
 
 // ゲストの情報を編集します
 //
@@ -38,11 +44,14 @@ func UpdateGuestInfo(e *gin.Engine, db *gorm.DB) {
 		}
 
 		// Tx
+		apiRes := Res{}
 		err = db.Transaction(func(tx *gorm.DB) error {
-			_, err = chat_expose.UpdateGuestInfo(tx, chatID, displayName, memo)
+			chatExposeRes, err := chat_expose.UpdateGuestInfo(tx, chatID, displayName, memo)
 			if err != nil {
 				return errors.NewError("ゲストの情報を更新できません", err)
 			}
+
+			apiRes.Chat = res.CastToChatAPIResForHost(chatExposeRes)
 
 			return nil
 		})
@@ -51,6 +60,6 @@ func UpdateGuestInfo(e *gin.Engine, db *gorm.DB) {
 			return
 		}
 
-		c.JSON(200, nil)
+		c.JSON(200, apiRes)
 	})
 }

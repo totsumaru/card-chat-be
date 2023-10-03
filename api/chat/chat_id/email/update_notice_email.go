@@ -4,10 +4,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
 	"github.com/totsumaru/card-chat-be/api/internal/cookie"
+	"github.com/totsumaru/card-chat-be/api/internal/res"
 	chat_expose "github.com/totsumaru/card-chat-be/context/chat/expose"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
+
+// レスポンスです
+type Res struct {
+	Chat res.ChatAPIRes `json:"chat"`
+}
 
 // 通知用のメールアドレスを変更します
 func UpdateNoticeEmail(e *gin.Engine, db *gorm.DB) {
@@ -29,11 +35,14 @@ func UpdateNoticeEmail(e *gin.Engine, db *gorm.DB) {
 		}
 
 		// Tx
+		apiRes := Res{}
 		err = db.Transaction(func(tx *gorm.DB) error {
-			_, err := chat_expose.UpdateEmail(tx, chatID, email)
+			chatExposeRes, err := chat_expose.UpdateEmail(tx, chatID, email)
 			if err != nil {
 				return errors.NewError("メールアドレスを更新できません", err)
 			}
+
+			apiRes.Chat = res.CastToChatAPIResForGuest(chatExposeRes)
 
 			return nil
 		})
@@ -42,6 +51,6 @@ func UpdateNoticeEmail(e *gin.Engine, db *gorm.DB) {
 			return
 		}
 
-		c.JSON(200, nil)
+		c.JSON(200, apiRes)
 	})
 }

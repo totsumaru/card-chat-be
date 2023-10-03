@@ -3,11 +3,17 @@ package create
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
+	"github.com/totsumaru/card-chat-be/api/internal/res"
 	"github.com/totsumaru/card-chat-be/api/internal/verify"
 	host_expose "github.com/totsumaru/card-chat-be/context/host/expose"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"gorm.io/gorm"
 )
+
+// レスポンスです
+type Res struct {
+	Host res.HostAPIRes `json:"host"`
+}
 
 // ホストを作成します
 func CreateHost(e *gin.Engine, db *gorm.DB) {
@@ -19,11 +25,15 @@ func CreateHost(e *gin.Engine, db *gorm.DB) {
 			return
 		}
 
+		// Tx
+		apiRes := Res{}
 		err := db.Transaction(func(tx *gorm.DB) error {
-			_, err := host_expose.CreateHost(tx, verifyRes.HostID)
+			hostExposeRes, err := host_expose.CreateHost(tx, verifyRes.HostID)
 			if err != nil {
 				return errors.NewError("ホストを作成できません", err)
 			}
+
+			apiRes.Host = res.CastToHostAPIRes(hostExposeRes)
 
 			return nil
 		})
@@ -32,6 +42,6 @@ func CreateHost(e *gin.Engine, db *gorm.DB) {
 			return
 		}
 
-		c.JSON(200, nil)
+		c.JSON(200, apiRes)
 	})
 }
