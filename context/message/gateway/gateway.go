@@ -112,7 +112,9 @@ func (g Gateway) FindLastByChatID(chatID id.UUID) (domain.Message, error) {
 	if err := g.tx.Where(
 		"chat_id = ?",
 		chatID.String(),
-	).Order("created desc").First(&dbMessage).Error; err != nil {
+	).Order(
+		"(data->>'created')::timestamp desc",
+	).First(&dbMessage).Error; err != nil {
 		// レコードが見つからない場合は空のメッセージを返す
 		if err == gorm.ErrRecordNotFound {
 			return empty, nil
