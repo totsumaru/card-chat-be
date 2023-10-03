@@ -57,7 +57,7 @@ func (g Gateway) Update(u domain.Host) error {
 	}
 
 	// IDに基づいてレコードを更新
-	result := g.tx.Model(&database.HostSchema{}).Where(
+	result := g.tx.Model(&database.Host{}).Where(
 		"id = ?",
 		dbHost.ID,
 	).Updates(&dbHost)
@@ -79,7 +79,7 @@ func (g Gateway) Update(u domain.Host) error {
 func (g Gateway) FindByID(id id.UUID) (domain.Host, error) {
 	res := domain.Host{}
 
-	var dbHost database.HostSchema
+	var dbHost database.Host
 	if err := g.tx.First(&dbHost, "id = ?", id.String()).Error; err != nil {
 		return res, errors.NewError("IDでホストを取得できません", err)
 	}
@@ -99,7 +99,7 @@ func (g Gateway) FindByID(id id.UUID) (domain.Host, error) {
 func (g Gateway) FindByIDForUpdate(id id.UUID) (domain.Host, error) {
 	res := domain.Host{}
 
-	var dbHost database.HostSchema
+	var dbHost database.Host
 	if err := g.tx.Set("gorm:query_option", "FOR UPDATE").First(
 		&dbHost, "id = ?", id.String(),
 	).Error; err != nil {
@@ -116,8 +116,8 @@ func (g Gateway) FindByIDForUpdate(id id.UUID) (domain.Host, error) {
 }
 
 // ドメインモデルをDBの構造体に変換します
-func castToDBHost(domainHost domain.Host) (database.HostSchema, error) {
-	res := database.HostSchema{}
+func castToDBHost(domainHost domain.Host) (database.Host, error) {
+	res := database.Host{}
 
 	b, err := json.Marshal(&domainHost)
 	if err != nil {
@@ -131,7 +131,7 @@ func castToDBHost(domainHost domain.Host) (database.HostSchema, error) {
 }
 
 // DBの構造体からドメインモデルに変換します
-func castToDomainModel(dbHost database.HostSchema) (domain.Host, error) {
+func castToDomainModel(dbHost database.Host) (domain.Host, error) {
 	res := domain.Host{}
 	if err := json.Unmarshal(dbHost.Data, &res); err != nil {
 		return res, errors.NewError("Unmarshalに失敗しました", err)

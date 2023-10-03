@@ -1,6 +1,8 @@
 package gateway
 
 import (
+	"encoding/json"
+
 	"github.com/totsumaru/card-chat-be/context/message/domain"
 	"github.com/totsumaru/card-chat-be/shared/database"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
@@ -27,7 +29,10 @@ func NewGateway(tx *gorm.DB) (Gateway, error) {
 
 // メッセージを新規作成します
 func (g Gateway) Create(m domain.Message) error {
-	dbMessage := castToDBMessage(m)
+	dbMessage, err := castToDBMessage(m)
+	if err != nil {
+		return errors.NewError("ドメインモデルをDBの構造体に変換できません", err)
+	}
 
 	// 新しいレコードをデータベースに保存
 	result := g.tx.Create(&dbMessage)
@@ -48,7 +53,7 @@ func (g Gateway) Create(m domain.Message) error {
 func (g Gateway) FindByID(id id.UUID) (domain.Message, error) {
 	res := domain.Message{}
 
-	var dbMessage database.MessageSchema
+	var dbMessage database.Message
 	if err := g.tx.First(&dbMessage, "id = ?", id.String()).Error; err != nil {
 		return res, errors.NewError("IDでチャットを取得できません", err)
 	}
@@ -68,13 +73,15 @@ func (g Gateway) FindByID(id id.UUID) (domain.Message, error) {
 //
 // createの降順(最新のメッセージが先頭)で取得します。
 func (g Gateway) FindByChatID(chatID id.UUID) ([]domain.Message, error) {
-	dbMessages := make([]database.MessageSchema, 0)
+	dbMessages := make([]database.Message, 0)
 
 	// Orderメソッドを使ってcreatedの降順でソート
 	if err := g.tx.Where(
 		"chat_id = ?",
 		chatID.String(),
-	).Order("created desc").Find(&dbMessages).Error; err != nil {
+	).Order(
+		"(data->>'created')::timestamp desc",
+	).Find(&dbMessages).Error; err != nil {
 		// レコードが存在しない場合、空のスライスを返します
 		if err == gorm.ErrRecordNotFound {
 			return []domain.Message{}, nil
@@ -99,7 +106,7 @@ func (g Gateway) FindByChatID(chatID id.UUID) ([]domain.Message, error) {
 // 取得できない場合は空の値を返し、エラーは発生しません。
 func (g Gateway) FindLastByChatID(chatID id.UUID) (domain.Message, error) {
 	empty := domain.Message{}
-	var dbMessage database.MessageSchema
+	var dbMessage database.Message
 
 	// Orderメソッドを使ってcreatedの降順でソートし、Firstメソッドで最新のメッセージを取得
 	if err := g.tx.Where(
@@ -123,44 +130,27 @@ func (g Gateway) FindLastByChatID(chatID id.UUID) (domain.Message, error) {
 }
 
 // ドメインモデルをDBの構造体に変換します
-func castToDBMessage(m domain.Message) database.MessageSchema {
-	return database.MessageSchema{
-		ID:      m.ID().String(),
-		ChatID:  m.ChatID().String(),
-		FromID:  m.FromID().String(),
-		Content: m.Content().String(),
-		Created: m.Created(),
+func castToDBMessage(domainMessage domain.Message) (database.Message, error) {
+	res := database.Message{}
+
+	b, err := json.Marshal(&domainMessage)
+	if err != nil {
+		return res, errors.NewError("Marshalに失敗しました", err)
 	}
+
+	res.ID = domainMessage.ID().String()
+	res.ChatID = domainMessage.ChatID().String()
+	res.Data = b
+
+	return res, nil
 }
 
 // DBのメッセージからドメインモデルに変換します
-func castToDomainModelMessage(dbMessage database.MessageSchema) (domain.Message, error) {
-	empty := domain.Message{}
-
-	mID, err := id.RestoreUUID(dbMessage.ID)
-	if err != nil {
-		return empty, errors.NewError("IDを復元できません", err)
+func castToDomainModelMessage(dbMessage database.Message) (domain.Message, error) {
+	res := domain.Message{}
+	if err := json.Unmarshal(dbMessage.Data, &res); err != nil {
+		return res, errors.NewError("Unmarshalに失敗しました", err)
 	}
 
-	chatID, err := id.RestoreUUID(dbMessage.ChatID)
-	if err != nil {
-		return empty, errors.NewError("チャットIDを復元できません", err)
-	}
-
-	fromID, err := id.RestoreUUID(dbMessage.FromID)
-	if err != nil {
-		return empty, errors.NewError("送信者のIDを復元できません", err)
-	}
-
-	content, err := domain.NewContent(dbMessage.Content)
-	if err != nil {
-		return empty, errors.NewError("内容を作成できません", err)
-	}
-
-	m, err := domain.RestoreMessage(mID, chatID, fromID, content, dbMessage.Created)
-	if err != nil {
-		return empty, errors.NewError("メッセージを作成できません", err)
-	}
-
-	return m, nil
+	return res, nil
 }

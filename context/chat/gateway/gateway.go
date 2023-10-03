@@ -57,7 +57,7 @@ func (g Gateway) Update(c domain.Chat) error {
 	}
 
 	// IDに基づいてレコードを更新
-	result := g.tx.Model(&database.ChatSchema{}).Where(
+	result := g.tx.Model(&database.Chat{}).Where(
 		"id = ?",
 		dbChat.ID,
 	).Updates(&dbChat)
@@ -79,7 +79,7 @@ func (g Gateway) Update(c domain.Chat) error {
 func (g Gateway) FindByID(id id.UUID) (domain.Chat, error) {
 	res := domain.Chat{}
 
-	dbChat := database.ChatSchema{}
+	dbChat := database.Chat{}
 	if err := g.tx.First(&dbChat, "id = ?", id.String()).Error; err != nil {
 		return res, errors.NewError("IDでチャットを取得できません", err)
 	}
@@ -99,7 +99,7 @@ func (g Gateway) FindByID(id id.UUID) (domain.Chat, error) {
 func (g Gateway) FindByIDForUpdate(id id.UUID) (domain.Chat, error) {
 	res := domain.Chat{}
 
-	dbChat := database.ChatSchema{}
+	dbChat := database.Chat{}
 	if err := g.tx.Set("gorm:query_option", "FOR UPDATE").First(
 		&dbChat, "id = ?", id.String(),
 	).Error; err != nil {
@@ -123,7 +123,7 @@ func (g Gateway) FindByIDForUpdate(id id.UUID) (domain.Chat, error) {
 //  1. IsRead=false(未読): メッセージが最近のものから降順
 //  2. IsRead=true(既読): メッセージが最近のものから降順
 func (g Gateway) FindByHostID(hostID id.UUID) ([]domain.Chat, error) {
-	var dbChats []database.ChatSchema
+	var dbChats []database.Chat
 
 	// ORDER BY句を使ってソート条件を指定
 	query := g.tx.Where(
@@ -156,8 +156,8 @@ func (g Gateway) FindByHostID(hostID id.UUID) ([]domain.Chat, error) {
 }
 
 // ドメインモデルをDBの構造体に変換します
-func castToDBChat(domainChat domain.Chat) (database.ChatSchema, error) {
-	res := database.ChatSchema{}
+func castToDBChat(domainChat domain.Chat) (database.Chat, error) {
+	res := database.Chat{}
 
 	b, err := json.Marshal(&domainChat)
 	if err != nil {
@@ -171,7 +171,7 @@ func castToDBChat(domainChat domain.Chat) (database.ChatSchema, error) {
 }
 
 // DBのチャットからドメインモデルのチャット構造体に変換します
-func castToDomainModelChat(dbChat database.ChatSchema) (domain.Chat, error) {
+func castToDomainModelChat(dbChat database.Chat) (domain.Chat, error) {
 	res := domain.Chat{}
 	if err := json.Unmarshal(dbChat.Data, &res); err != nil {
 		return res, errors.NewError("Unmarshalに失敗しました", err)
