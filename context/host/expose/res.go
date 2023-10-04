@@ -10,6 +10,7 @@ import (
 type Res struct {
 	ID           string
 	Name         string
+	Email        string
 	AvatarURL    string
 	Headline     string
 	Introduction string
@@ -29,6 +30,7 @@ func CreateRes(u domain.Host) Res {
 	res := Res{}
 	res.ID = u.ID().String()
 	res.Name = u.Name().String()
+	res.Email = u.Email().String()
 	res.AvatarURL = u.Avatar().URL().String()
 	res.Headline = u.Headline().String()
 	res.Introduction = u.Introduction().String()

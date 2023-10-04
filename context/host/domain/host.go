@@ -6,6 +6,7 @@ import (
 
 	"github.com/totsumaru/card-chat-be/context/host/domain/avatar"
 	"github.com/totsumaru/card-chat-be/context/host/domain/company"
+	"github.com/totsumaru/card-chat-be/shared/domain_model/email"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"github.com/totsumaru/card-chat-be/shared/now"
@@ -15,6 +16,7 @@ import (
 type Host struct {
 	id           id.UUID // supabaseのIDと一致します
 	name         Name
+	email        email.Email
 	avatar       avatar.Avatar
 	headline     Headline
 	introduction Introduction
@@ -24,40 +26,17 @@ type Host struct {
 }
 
 // ホストを作成します
-func NewHost(id id.UUID) (Host, error) {
-	res := Host{
-		id:      id,
-		created: now.NowJST(),
-		updated: now.NowJST(),
-	}
-
-	if err := res.validate(); err != nil {
-		return res, errors.NewError("検証に失敗しました", err)
-	}
-
-	return res, nil
-}
-
-// ホストを復元します
-func RestoreHost(
+func NewHost(
 	id id.UUID,
+	email email.Email,
 	name Name,
-	avatarURL avatar.Avatar,
-	headline Headline,
-	introduction Introduction,
-	company company.Company,
-	created time.Time,
-	updated time.Time,
 ) (Host, error) {
 	res := Host{
-		id:           id,
-		name:         name,
-		avatar:       avatarURL,
-		headline:     headline,
-		introduction: introduction,
-		company:      company,
-		created:      created,
-		updated:      updated,
+		id:      id,
+		email:   email,
+		name:    name,
+		created: now.NowJST(),
+		updated: now.NowJST(),
 	}
 
 	if err := res.validate(); err != nil {
@@ -97,6 +76,11 @@ func (h Host) ID() id.UUID {
 // 名前を取得します
 func (h Host) Name() Name {
 	return h.name
+}
+
+// Emailを取得します
+func (h Host) Email() email.Email {
+	return h.email
 }
 
 // アバターURLを取得します
@@ -147,6 +131,7 @@ func (h Host) MarshalJSON() ([]byte, error) {
 	data := struct {
 		ID           id.UUID         `json:"id"`
 		Name         Name            `json:"name"`
+		Email        email.Email     `json:"email"`
 		Avatar       avatar.Avatar   `json:"avatar"`
 		Headline     Headline        `json:"headline"`
 		Introduction Introduction    `json:"introduction"`
@@ -156,6 +141,7 @@ func (h Host) MarshalJSON() ([]byte, error) {
 	}{
 		ID:           h.id,
 		Name:         h.name,
+		Email:        h.email,
 		Avatar:       h.avatar,
 		Headline:     h.headline,
 		Introduction: h.introduction,
@@ -177,6 +163,7 @@ func (h *Host) UnmarshalJSON(b []byte) error {
 	var data struct {
 		ID           id.UUID         `json:"id"`
 		Name         Name            `json:"name"`
+		Email        email.Email     `json:"email"`
 		Avatar       avatar.Avatar   `json:"avatar"`
 		Headline     Headline        `json:"headline"`
 		Introduction Introduction    `json:"introduction"`
@@ -191,6 +178,7 @@ func (h *Host) UnmarshalJSON(b []byte) error {
 
 	h.id = data.ID
 	h.name = data.Name
+	h.email = data.Email
 	h.avatar = data.Avatar
 	h.headline = data.Headline
 	h.introduction = data.Introduction

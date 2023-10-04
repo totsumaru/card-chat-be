@@ -7,7 +7,7 @@ import (
 	"github.com/totsumaru/card-chat-be/context/host/domain/avatar"
 	"github.com/totsumaru/card-chat-be/context/host/domain/company"
 	"github.com/totsumaru/card-chat-be/context/host/gateway"
-	"github.com/totsumaru/card-chat-be/context/host/gateway/cloudflare"
+	"github.com/totsumaru/card-chat-be/shared/cloudflare"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/email"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/tel"

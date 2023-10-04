@@ -25,10 +25,14 @@ func CreateHost(e *gin.Engine, db *gorm.DB) {
 			return
 		}
 
+		name := c.Query("name")
+
 		// Tx
 		apiRes := Res{}
 		err := db.Transaction(func(tx *gorm.DB) error {
-			hostExposeRes, err := host_expose.CreateHost(tx, verifyRes.HostID)
+			hostExposeRes, err := host_expose.CreateHost(
+				tx, verifyRes.HostID, verifyRes.Email, name,
+			)
 			if err != nil {
 				return errors.NewError("ホストを作成できません", err)
 			}
