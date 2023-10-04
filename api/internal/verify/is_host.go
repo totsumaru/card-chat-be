@@ -14,7 +14,7 @@ func IsHost(db *gorm.DB, chatID, hostID string) (bool, error) {
 		return false, errors.NewError("チャットを取得できません", err)
 	}
 
-	// ホストIDがが一致するかを確認します
+	// ホストIDが一致するかを確認します
 	if chatRes.HostID == hostID {
 		return true, nil
 	}

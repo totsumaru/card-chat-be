@@ -121,13 +121,13 @@ func SendMessage(e *gin.Engine, db *gorm.DB) {
 			}
 
 			// メールを送信します
-			sendEmailReq := resend.SendEmailReq{
+			sendEmailReq := resend.SendMessageEmailReq{
 				ChatID:          chatExposeRes.ID,
 				ToAddress:       toAddr,
 				Message:         messageExposeRes.Content,
 				FromDisplayName: fromName,
 			}
-			if backendErr = resend.SendEmail(sendEmailReq); backendErr != nil {
+			if backendErr = resend.SendMessageEmail(sendEmailReq); backendErr != nil {
 				return errors.NewError("メールを送信できません", backendErr)
 			}
 

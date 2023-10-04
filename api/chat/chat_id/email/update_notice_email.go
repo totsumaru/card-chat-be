@@ -1,12 +1,15 @@
 package email
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
 	"github.com/totsumaru/card-chat-be/api/internal/cookie"
 	"github.com/totsumaru/card-chat-be/api/internal/res"
 	chat_expose "github.com/totsumaru/card-chat-be/context/chat/expose"
 	"github.com/totsumaru/card-chat-be/shared/errors"
+	"github.com/totsumaru/card-chat-be/shared/resend"
 	"gorm.io/gorm"
 )
 
@@ -48,6 +51,12 @@ func UpdateNoticeEmail(e *gin.Engine, db *gorm.DB) {
 		})
 		if err != nil {
 			api_err.Send(c, 500, errors.NewError("Txエラー", err))
+			return
+		}
+
+		// メールを送信します
+		if err = resend.SendEmailEdited(email); err != nil {
+			log.Println("メールの送信に失敗しました", err)
 			return
 		}
 
