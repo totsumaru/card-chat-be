@@ -2,6 +2,7 @@ package message
 
 import (
 	"log"
+	"mime/multipart"
 
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/card-chat-be/api/internal/api_err"
@@ -9,6 +10,7 @@ import (
 	"github.com/totsumaru/card-chat-be/api/internal/verify"
 	chat_expose "github.com/totsumaru/card-chat-be/context/chat/expose"
 	host_expose "github.com/totsumaru/card-chat-be/context/host/expose"
+	"github.com/totsumaru/card-chat-be/context/message/domain/content"
 	message_expose "github.com/totsumaru/card-chat-be/context/message/expose"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"github.com/totsumaru/card-chat-be/shared/resend"
@@ -29,8 +31,22 @@ import (
 func SendMessage(e *gin.Engine, db *gorm.DB) {
 	e.POST("/api/chat/:chatID/message", func(c *gin.Context) {
 		chatID := c.Param("chatID")
+		kind := c.Query("kind")
 
-		content := c.PostForm("content")
+		var err error
+		var text string
+		var f *multipart.FileHeader
+
+		switch kind {
+		case "text":
+			text = c.PostForm("text")
+		case "image":
+			f, err = c.FormFile("image")
+			if err != nil {
+				api_err.Send(c, 400, errors.NewError("画像の確認ができません", err))
+				return
+			}
+		}
 
 		var fromID string
 
@@ -66,8 +82,14 @@ func SendMessage(e *gin.Engine, db *gorm.DB) {
 			chatExposeRes    chat_expose.Res
 		)
 		backendErr := db.Transaction(func(tx *gorm.DB) error {
-			var err error
-			messageExposeRes, err = message_expose.CreateMessage(tx, chatID, fromID, content)
+			req := message_expose.Req{}
+			req.ChatID = chatID
+			req.FromID = fromID
+			req.Content.Kind = content.KindValue(kind)
+			req.Content.Text = text
+			req.Content.Image = f
+
+			messageExposeRes, err = message_expose.CreateMessage(tx, req)
 			if err != nil {
 				return errors.NewError("メッセージを作成できません", err)
 			}
@@ -120,11 +142,19 @@ func SendMessage(e *gin.Engine, db *gorm.DB) {
 				toAddr = chatExposeRes.Guest.Email
 			}
 
+			var emailMsg string
+			switch messageExposeRes.Content.Kind {
+			case "text":
+				emailMsg = messageExposeRes.Content.Text
+			case "image":
+				emailMsg = "画像が送信されました"
+			}
+
 			// メールを送信します
 			sendEmailReq := resend.SendMessageEmailReq{
 				ChatID:          chatExposeRes.ID,
 				ToAddress:       toAddr,
-				Message:         messageExposeRes.Content,
+				Message:         emailMsg,
 				FromDisplayName: fromName,
 			}
 			if backendErr = resend.SendMessageEmail(sendEmailReq); backendErr != nil {

@@ -1,6 +1,7 @@
 package edit
 
 import (
+	defaultErrors "errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -34,7 +35,7 @@ func EditHostProfile(e *gin.Engine, db *gorm.DB) {
 		err := db.Transaction(func(tx *gorm.DB) error {
 			// ファイルが添付されていない場合はエラーにならない
 			avatarImageFile, err := c.FormFile("avatar")
-			if err != nil && err != http.ErrMissingFile {
+			if err != nil && !defaultErrors.Is(err, http.ErrMissingFile) {
 				return errors.NewError("ファイルを取得できません")
 			}
 

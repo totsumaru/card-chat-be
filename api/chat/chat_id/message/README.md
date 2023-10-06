@@ -4,13 +4,20 @@
 
 自分がホストであれば`host`、cookieのパスコードで認証した場合は`guest`として登録します。
 
+kindが`text`の場合はtextのみ、`image`の場合は画像ファイルがが必要です。
+
 ```
 [POST] /api/chat/[chat-id]/message
 ```
 
 ### URL Params
 
-なし
+- `kind`(required)
+    - `text` | `image`
+
+```
+?kind=text
+```
 
 ### Header
 
@@ -25,14 +32,15 @@ Authorization: Bearer [token]
 - `Content-Type`
 
 ```text
-Content-Type: application/x-www-form-urlencoded
+Content-Type: multipart/form-data
 ```
 
 ### Body(Form)
 
-| Field Name | Type   | 
-|------------|--------|
-| `content`  | String |
+| Field Name | Type   | Memo         | 
+|------------|--------|--------------|
+| `image`    | File   | kind=`image` |
+| `text`     | String | kind=`text`  |
 
 ### Success
 

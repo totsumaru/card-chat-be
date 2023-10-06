@@ -1,15 +1,16 @@
 package expose
 
 import (
+	"fmt"
 	"mime/multipart"
 
 	"github.com/totsumaru/card-chat-be/context/host/domain"
-	"github.com/totsumaru/card-chat-be/context/host/domain/avatar"
 	"github.com/totsumaru/card-chat-be/context/host/domain/company"
 	"github.com/totsumaru/card-chat-be/context/host/gateway"
 	"github.com/totsumaru/card-chat-be/shared/cloudflare"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/email"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
+	"github.com/totsumaru/card-chat-be/shared/domain_model/image"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/tel"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/url"
 	"github.com/totsumaru/card-chat-be/shared/errors"
@@ -50,13 +51,14 @@ func UpdateHost(tx *gorm.DB, req UpdateHostReq) (Res, error) {
 		return empty, errors.NewError("IDでホストを取得できません", err)
 	}
 
-	imageID := h.Avatar().ImageID()
+	imageID := h.Avatar().CloudflareID()
 	avatarURL := h.Avatar().URL()
 
 	// 新規画像がある場合
 	if req.AvatarFile != nil && req.AvatarFile.Size != 0 {
 		// CloudflareImageに画像をアップロードします
-		avatarRes, err := cloudflare.UploadImageToCloudflare(h.ID(), req.AvatarFile)
+		path := fmt.Sprintf("host/%s", h.ID().String())
+		avatarRes, err := cloudflare.UploadImageToCloudflare(path, req.AvatarFile)
 		if err != nil {
 			return empty, errors.NewError("ファイルをアップロードできません", err)
 		}
@@ -72,7 +74,7 @@ func UpdateHost(tx *gorm.DB, req UpdateHostReq) (Res, error) {
 		}
 
 		// 既存画像がある場合はcloudflareの画像を削除します
-		beforeImageID := h.Avatar().ImageID()
+		beforeImageID := h.Avatar().CloudflareID()
 		if !beforeImageID.IsEmpty() {
 			if err = cloudflare.DeleteImageFromCloudflare(beforeImageID); err != nil {
 				return empty, errors.NewError("現在のファイルを削除できません", err)
@@ -85,7 +87,7 @@ func UpdateHost(tx *gorm.DB, req UpdateHostReq) (Res, error) {
 	if err != nil {
 		return empty, errors.NewError("名前を作成できません", err)
 	}
-	avt, err := avatar.NewAvatar(imageID, avatarURL)
+	avt, err := image.NewImage(imageID, avatarURL)
 	if err != nil {
 		return empty, errors.NewError("アバターを作成できません", err)
 	}

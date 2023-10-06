@@ -30,6 +30,11 @@ func (u URL) String() string {
 	return u.value
 }
 
+// 空かどうか判定します
+func (u URL) IsEmpty() bool {
+	return u.value == ""
+}
+
 // 検証します
 //
 // 空を許容します。

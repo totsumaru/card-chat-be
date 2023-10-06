@@ -11,17 +11,24 @@ type Res struct {
 	ID      string
 	ChatID  string
 	FromID  string
-	Content string
+	Content struct {
+		Kind string
+		URL  string
+		Text string
+	}
 	Created time.Time
 }
 
 // メッセージをレスポンスに変換します
 func CreateRes(m domain.Message) Res {
-	return Res{
-		ID:      m.ID().String(),
-		ChatID:  m.ChatID().String(),
-		FromID:  m.FromID().String(),
-		Content: m.Content().String(),
-		Created: m.Created(),
-	}
+	res := Res{}
+	res.ID = m.ID().String()
+	res.ChatID = m.ChatID().String()
+	res.FromID = m.FromID().String()
+	res.Content.Kind = m.Content().Kind().String()
+	res.Content.URL = m.Content().URL().String()
+	res.Content.Text = m.Content().Text().String()
+	res.Created = m.Created()
+
+	return res
 }

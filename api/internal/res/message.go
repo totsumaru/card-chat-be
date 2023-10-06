@@ -8,22 +8,30 @@ import (
 
 // メッセージのレスポンスです
 type MessageAPIRes struct {
-	ID      string    `json:"id"`
-	ChatID  string    `json:"chat_id"`
-	FromID  string    `json:"from_id"`
-	Content string    `json:"content"`
+	ID      string `json:"id"`
+	ChatID  string `json:"chat_id"`
+	FromID  string `json:"from_id"`
+	Content struct {
+		Kind string `json:"kind"`
+		URL  string `json:"url"`
+		Text string `json:"text"`
+	} `json:"content"`
 	Created time.Time `json:"created"`
 }
 
 // バックエンドのレスポンスをAPIのレスポンスに変換します
 func CastToMessageAPIRes(backendResMessage message_expose.Res) MessageAPIRes {
-	return MessageAPIRes{
-		ID:      backendResMessage.ID,
-		ChatID:  backendResMessage.ChatID,
-		FromID:  backendResMessage.FromID,
-		Content: backendResMessage.Content,
-		Created: backendResMessage.Created,
-	}
+	res := MessageAPIRes{}
+
+	res.ID = backendResMessage.ID
+	res.ChatID = backendResMessage.ChatID
+	res.FromID = backendResMessage.FromID
+	res.Content.Kind = backendResMessage.Content.Kind
+	res.Content.URL = backendResMessage.Content.URL
+	res.Content.Text = backendResMessage.Content.Text
+	res.Created = backendResMessage.Created
+
+	return res
 }
 
 // 複数のバックエンドのレスポンスをAPIのレスポンスに変換します
@@ -31,13 +39,15 @@ func CastToMessagesAPIRes(backendResMessages []message_expose.Res) []MessageAPIR
 	res := make([]MessageAPIRes, 0)
 
 	for _, msg := range backendResMessages {
-		msgRes := MessageAPIRes{
-			ID:      msg.ID,
-			ChatID:  msg.ChatID,
-			FromID:  msg.FromID,
-			Content: msg.Content,
-			Created: msg.Created,
-		}
+		msgRes := MessageAPIRes{}
+		msgRes.ID = msg.ID
+		msgRes.ChatID = msg.ChatID
+		msgRes.FromID = msg.FromID
+		msgRes.Content.Kind = msg.Content.Kind
+		msgRes.Content.URL = msg.Content.URL
+		msgRes.Content.Text = msg.Content.Text
+		msgRes.Created = msg.Created
+
 		res = append(res, msgRes)
 	}
 

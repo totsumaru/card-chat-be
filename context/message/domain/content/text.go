@@ -1,4 +1,4 @@
-package domain
+package content
 
 import (
 	"encoding/json"
@@ -6,16 +6,16 @@ import (
 	"github.com/totsumaru/card-chat-be/shared/errors"
 )
 
-const ContentMaxLen = 500
+const TextMaxLen = 500
 
-// 内容です
-type Content struct {
+// テキストです
+type Text struct {
 	value string
 }
 
-// 内容を作成します
-func NewContent(value string) (Content, error) {
-	res := Content{
+// テキストを作成します
+func NewText(value string) (Text, error) {
+	res := Text{
 		value: value,
 	}
 
@@ -26,18 +26,19 @@ func NewContent(value string) (Content, error) {
 	return res, nil
 }
 
-// 内容を取得します
-func (c Content) String() string {
-	return c.value
+// テキストを取得します
+func (t Text) String() string {
+	return t.value
 }
 
 // 空か判定します
-func (c Content) IsEmpty() bool {
-	return c.value == ""
+func (t Text) IsEmpty() bool {
+	return t.value == ""
 }
 
-func (c Content) validate() error {
-	if len(c.value) > ContentMaxLen {
+// 検証します
+func (t Text) validate() error {
+	if len(t.value) > TextMaxLen {
 		return errors.NewError("文字数を超えています")
 	}
 
@@ -45,11 +46,11 @@ func (c Content) validate() error {
 }
 
 // 構造体からJSONに変換します
-func (c Content) MarshalJSON() ([]byte, error) {
+func (t Text) MarshalJSON() ([]byte, error) {
 	data := struct {
 		Value string `json:"value"`
 	}{
-		Value: c.value,
+		Value: t.value,
 	}
 
 	b, err := json.Marshal(data)
@@ -61,7 +62,7 @@ func (c Content) MarshalJSON() ([]byte, error) {
 }
 
 // JSONから構造体に変換します
-func (c *Content) UnmarshalJSON(b []byte) error {
+func (t *Text) UnmarshalJSON(b []byte) error {
 	var data struct {
 		Value string `json:"value"`
 	}
@@ -70,7 +71,7 @@ func (c *Content) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	c.value = data.Value
+	t.value = data.Value
 
 	return nil
 }

@@ -1,4 +1,4 @@
-package avatar
+package image
 
 import (
 	"encoding/json"
@@ -8,17 +8,17 @@ import (
 	"github.com/totsumaru/card-chat-be/shared/errors"
 )
 
-// アバターです
-type Avatar struct {
-	imageID id.UUID // cloudflareの画像IDです
-	url     url.URL
+// 画像です
+type Image struct {
+	cloudflareID id.UUID // cloudflareの画像IDです
+	url          url.URL
 }
 
-// アバターを作成します
-func NewAvatar(imageID id.UUID, url url.URL) (Avatar, error) {
-	res := Avatar{
-		imageID: imageID,
-		url:     url,
+// 画像を作成します
+func NewImage(cloudflareID id.UUID, url url.URL) (Image, error) {
+	res := Image{
+		cloudflareID: cloudflareID,
+		url:          url,
 	}
 
 	if err := res.validate(); err != nil {
@@ -29,28 +29,28 @@ func NewAvatar(imageID id.UUID, url url.URL) (Avatar, error) {
 }
 
 // 画像IDを取得します
-func (a Avatar) ImageID() id.UUID {
-	return a.imageID
+func (a Image) CloudflareID() id.UUID {
+	return a.cloudflareID
 }
 
 // URLを取得します
-func (a Avatar) URL() url.URL {
+func (a Image) URL() url.URL {
 	return a.url
 }
 
 // 検証します
-func (a Avatar) validate() error {
+func (a Image) validate() error {
 	return nil
 }
 
 // 構造体からJSONに変換します
-func (a Avatar) MarshalJSON() ([]byte, error) {
+func (a Image) MarshalJSON() ([]byte, error) {
 	data := struct {
-		ImageID id.UUID `json:"image_id"`
-		URL     url.URL `json:"url"`
+		CloudflareID id.UUID `json:"cloudflare_id"`
+		URL          url.URL `json:"url"`
 	}{
-		ImageID: a.imageID,
-		URL:     a.url,
+		CloudflareID: a.cloudflareID,
+		URL:          a.url,
 	}
 
 	b, err := json.Marshal(data)
@@ -62,17 +62,17 @@ func (a Avatar) MarshalJSON() ([]byte, error) {
 }
 
 // JSONから構造体に変換します
-func (a *Avatar) UnmarshalJSON(b []byte) error {
+func (a *Image) UnmarshalJSON(b []byte) error {
 	var data struct {
-		ImageID id.UUID `json:"image_id"`
-		URL     url.URL `json:"url"`
+		CloudflareID id.UUID `json:"cloudflare_id"`
+		URL          url.URL `json:"url"`
 	}
 
 	if err := json.Unmarshal(b, &data); err != nil {
 		return err
 	}
 
-	a.imageID = data.ImageID
+	a.cloudflareID = data.CloudflareID
 	a.url = data.URL
 
 	return nil

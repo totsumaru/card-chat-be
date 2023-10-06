@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 )
 
@@ -33,7 +32,7 @@ type Res struct {
 //
 // 画像URLを返します。
 // 画像が空の場合はアップロードせず、空の文字列""を返します。
-func UploadImageToCloudflare(hostID id.UUID, image *multipart.FileHeader) (Res, error) {
+func UploadImageToCloudflare(fileName string, image *multipart.FileHeader) (Res, error) {
 	res := Res{}
 
 	if image == nil || image.Size == 0 {
@@ -60,7 +59,7 @@ func UploadImageToCloudflare(hostID id.UUID, image *multipart.FileHeader) (Res, 
 	}(file)
 
 	// ファイルをmultipartに追加
-	fileWriter, err := writer.CreateFormFile("file", hostID.String())
+	fileWriter, err := writer.CreateFormFile("file", fileName)
 	if err != nil {
 		return res, err
 	}

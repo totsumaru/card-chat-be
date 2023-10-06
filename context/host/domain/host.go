@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/totsumaru/card-chat-be/context/host/domain/avatar"
 	"github.com/totsumaru/card-chat-be/context/host/domain/company"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/email"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
+	"github.com/totsumaru/card-chat-be/shared/domain_model/image"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"github.com/totsumaru/card-chat-be/shared/now"
 )
@@ -17,7 +17,7 @@ type Host struct {
 	id           id.UUID // supabaseのIDと一致します
 	name         Name
 	email        email.Email
-	avatar       avatar.Avatar
+	avatar       image.Image
 	headline     Headline
 	introduction Introduction
 	company      company.Company
@@ -49,7 +49,7 @@ func NewHost(
 // ホスト情報を更新します
 func (h *Host) UpdateHost(
 	name Name,
-	avatar avatar.Avatar,
+	avatar image.Image,
 	headline Headline,
 	introduction Introduction,
 	company company.Company,
@@ -83,8 +83,8 @@ func (h Host) Email() email.Email {
 	return h.email
 }
 
-// アバターURLを取得します
-func (h Host) Avatar() avatar.Avatar {
+// アバターを取得します
+func (h Host) Avatar() image.Image {
 	return h.avatar
 }
 
@@ -132,7 +132,7 @@ func (h Host) MarshalJSON() ([]byte, error) {
 		ID           id.UUID         `json:"id"`
 		Name         Name            `json:"name"`
 		Email        email.Email     `json:"email"`
-		Avatar       avatar.Avatar   `json:"avatar"`
+		Avatar       image.Image     `json:"avatar"`
 		Headline     Headline        `json:"headline"`
 		Introduction Introduction    `json:"introduction"`
 		Company      company.Company `json:"company"`
@@ -164,7 +164,7 @@ func (h *Host) UnmarshalJSON(b []byte) error {
 		ID           id.UUID         `json:"id"`
 		Name         Name            `json:"name"`
 		Email        email.Email     `json:"email"`
-		Avatar       avatar.Avatar   `json:"avatar"`
+		Avatar       image.Image     `json:"avatar"`
 		Headline     Headline        `json:"headline"`
 		Introduction Introduction    `json:"introduction"`
 		Company      company.Company `json:"company"`

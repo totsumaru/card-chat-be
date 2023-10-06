@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/totsumaru/card-chat-be/context/message/domain/content"
 	"github.com/totsumaru/card-chat-be/shared/domain_model/id"
 	"github.com/totsumaru/card-chat-be/shared/errors"
 	"github.com/totsumaru/card-chat-be/shared/now"
@@ -14,44 +15,21 @@ type Message struct {
 	id      id.UUID
 	chatID  id.UUID
 	fromID  id.UUID // hostID or chatID が入ります
-	content Content
+	content content.Content
 	created time.Time
 }
 
 // メッセージを作成します
-func NewMessage(chatID, fromID id.UUID, content Content) (Message, error) {
-	mID, err := id.NewUUID()
-	if err != nil {
-		return Message{}, errors.NewError("IDを作成できません", err)
-	}
-
+//
+// 画像メッセージの際、CloudflareにメッセージIDを使用するため、
+// 外部でIDを生成します。
+func NewMessage(messageID, chatID, fromID id.UUID, content content.Content) (Message, error) {
 	res := Message{
-		id:      mID,
+		id:      messageID,
 		chatID:  chatID,
 		fromID:  fromID,
 		content: content,
 		created: now.NowJST(),
-	}
-
-	if err = res.validate(); err != nil {
-		return Message{}, errors.NewError("検証に失敗しました", err)
-	}
-
-	return res, nil
-}
-
-// メッセージを復元します
-func RestoreMessage(
-	id, chatID, fromID id.UUID,
-	content Content,
-	created time.Time,
-) (Message, error) {
-	res := Message{
-		id:      id,
-		chatID:  chatID,
-		fromID:  fromID,
-		content: content,
-		created: created,
 	}
 
 	if err := res.validate(); err != nil {
@@ -77,7 +55,7 @@ func (m Message) FromID() id.UUID {
 }
 
 // 送信内容を取得します
-func (m Message) Content() Content {
+func (m Message) Content() content.Content {
 	return m.content
 }
 
@@ -98,11 +76,11 @@ func (m Message) validate() error {
 // 構造体からJSONに変換します
 func (m Message) MarshalJSON() ([]byte, error) {
 	data := struct {
-		ID      id.UUID   `json:"id"`
-		ChatID  id.UUID   `json:"chat_id"`
-		FromID  id.UUID   `json:"from_id"`
-		Content Content   `json:"content"`
-		Created time.Time `json:"created"`
+		ID      id.UUID         `json:"id"`
+		ChatID  id.UUID         `json:"chat_id"`
+		FromID  id.UUID         `json:"from_id"`
+		Content content.Content `json:"content"`
+		Created time.Time       `json:"created"`
 	}{
 		ID:      m.id,
 		ChatID:  m.chatID,
@@ -122,11 +100,11 @@ func (m Message) MarshalJSON() ([]byte, error) {
 // JSONから構造体に変換します
 func (m *Message) UnmarshalJSON(b []byte) error {
 	var data struct {
-		ID      id.UUID   `json:"id"`
-		ChatID  id.UUID   `json:"chat_id"`
-		FromID  id.UUID   `json:"from_id"`
-		Content Content   `json:"content"`
-		Created time.Time `json:"created"`
+		ID      id.UUID         `json:"id"`
+		ChatID  id.UUID         `json:"chat_id"`
+		FromID  id.UUID         `json:"from_id"`
+		Content content.Content `json:"content"`
+		Created time.Time       `json:"created"`
 	}
 
 	if err := json.Unmarshal(b, &data); err != nil {
