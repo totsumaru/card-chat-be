@@ -110,5 +110,8 @@ func UploadImageToCloudflare(fileName string, image *multipart.FileHeader) (Res,
 		}
 	}
 
-	return Res{}, errors.NewError("ファイルのアップロードに失敗しました")
+	return Res{}, errors.NewError(fmt.Sprintf(
+		"ファイルのアップロードに失敗しました。status: %d",
+		resp.StatusCode,
+	))
 }

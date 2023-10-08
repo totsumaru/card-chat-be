@@ -7,7 +7,7 @@ import (
 )
 
 // 名前の文字数上限です
-const NameMaxLen = 30
+const NameMaxLen = 50
 
 // 名前です
 type Name struct {
