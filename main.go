@@ -53,6 +53,8 @@ func main() {
 			"http://localhost:3000",
 			"https://patchat.jp",
 			"https://*.patchat.jp",
+			"https://stg-app.patchat.jp",
+			"https://app.patchat.jp",
 		},
 		// アクセスを許可したいHTTPメソッド(以下の例だとPUTやDELETEはアクセスできません)
 		AllowMethods: []string{
