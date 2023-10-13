@@ -53,6 +53,8 @@ func main() {
 			"http://localhost:3000",
 			"https://patchat.jp",
 			"https://*.patchat.jp",
+			"https://stg-app.patchat.jp",
+			"https://app.patchat.jp",
 		},
 		// アクセスを許可したいHTTPメソッド(以下の例だとPUTやDELETEはアクセスできません)
 		AllowMethods: []string{
@@ -62,13 +64,15 @@ func main() {
 		},
 		// 許可したいHTTPリクエストヘッダ
 		AllowHeaders: []string{
-			"Access-Control-Allow-Credentials",
-			"Access-Control-Allow-Headers",
-			"Access-Control-Allow-Origin",
+			"Origin",
+			"Content-Length",
 			"Content-Type",
 			"Authorization",
+			"Accept",
+			"X-Requested-With",
 			"Passcode",
 		},
+		ExposeHeaders: []string{"Content-Length"},
 		// cookieなどの情報を必要とするかどうか
 		AllowCredentials: true,
 		// preflightリクエストの結果をキャッシュする時間
