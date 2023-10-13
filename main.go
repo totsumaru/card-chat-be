@@ -57,8 +57,8 @@ func main() {
 		// アクセスを許可したいHTTPメソッド(以下の例だとPUTやDELETEはアクセスできません)
 		AllowMethods: []string{
 			"GET",
-			"PATCH",
 			"POST",
+			"OPTIONS",
 		},
 		// 許可したいHTTPリクエストヘッダ
 		AllowHeaders: []string{
