@@ -62,13 +62,15 @@ func main() {
 		},
 		// 許可したいHTTPリクエストヘッダ
 		AllowHeaders: []string{
-			"Access-Control-Allow-Credentials",
-			"Access-Control-Allow-Headers",
-			"Access-Control-Allow-Origin",
+			"Origin",
+			"Content-Length",
 			"Content-Type",
 			"Authorization",
+			"Accept",
+			"X-Requested-With",
 			"Passcode",
 		},
+		ExposeHeaders: []string{"Content-Length"},
 		// cookieなどの情報を必要とするかどうか
 		AllowCredentials: true,
 		// preflightリクエストの結果をキャッシュする時間
